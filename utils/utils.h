@@ -1,0 +1,6 @@
+#pragma once
+#include <reaper_plugin.h>
+
+bool has_single_selected_track(MediaTrack*& out_track);
+bool is_track_under_mouse(MediaTrack* track, int* context_out = nullptr);
+double bars_to_seconds(int bars, double bpm, double beats_per_bar);

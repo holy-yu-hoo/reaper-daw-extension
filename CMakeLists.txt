@@ -4,12 +4,15 @@ set(CMAKE_CXX_STANDARD 23)
 
 
 add_library(reaex MODULE)
-target_include_directories(reaex PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/sdk)
+target_include_directories(reaex PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/sdk)
 
 target_sources(reaex
 	PRIVATE
 	main.cpp
-	commands.cpp
+	core/api_load.cpp
+	commands/actions.cpp
+	commands/commands.cpp
+	utils/utils.cpp
 )
 
 set_target_properties(reaex PROPERTIES OUTPUT_NAME "reaper_reaex")
