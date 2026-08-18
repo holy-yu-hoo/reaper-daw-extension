@@ -1,5 +1,38 @@
 #include "utils.h"
-#include <reaper_plugin_functions.h>
+#include "../core/api.h"
+
+bool has_single_selected_track(MediaTrack *&out_track) {
+	if (CountSelectedTracks(nullptr) != 1) {
+		return false;
+	}
+	out_track = GetSelectedTrack(nullptr, 0);
+	return out_track != nullptr;
+}
+
+bool is_track_under_mouse(MediaTrack *track, int *context_out) {
+	if (!BR_TrackAtMouseCursor) {
+		return false;
+	}
+	int context = 0;
+	const MediaTrack *hovered = BR_TrackAtMouseCursor(&context, nullptr);
+	if (context_out) {
+		*context_out = context;
+	}
+	return hovered == track;
+}
+
+
+double bars_to_seconds(int bars, double bpm, double beats_per_bar) {
+	if (bars <= 0) {
+		return 0.0;
+	}
+	if (bpm <= 0.0 || beats_per_bar <= 0.0) {
+		bpm = 120.0;
+		beats_per_bar = 4.0;
+	}
+	return (bars * beats_per_bar * 60.0) / bpm;
+}
+
 
 bool get_track_state_chunk(MediaTrack *track, std::string &chunk) {
 	chunk.clear();
@@ -14,7 +47,7 @@ bool get_track_state_chunk(MediaTrack *track, std::string &chunk) {
 }
 
 
-std::pair<int, int> get_track_fx_chunk_borders(std::string chunk, std::string fx_guid) {
+std::pair<int, int> get_track_fx_chunk_borders(const std::string &chunk, const std::string &fx_guid) {
 	int i = chunk.find(fx_guid); // guid position
 	while (chunk[i] != '>') i--;
 	int e = --i;
@@ -62,7 +95,7 @@ std::string get_track_fx_chunk(MediaTrack *track, int fx) {
 	return fx_chunk;
 }
 
-std::string set_track_fx_chunk(MediaTrack *track, int fx, std::string new_fx_chunk) { // return new track chunk, NOT change track
+std::string set_track_fx_chunk(MediaTrack *track, int fx, const std::string &new_fx_chunk) { // return new track chunk, NOT change track
 	std::string chunk;
 	bool ret = get_track_state_chunk(track, chunk);
 	if (!ret) {
