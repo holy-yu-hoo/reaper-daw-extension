@@ -1,7 +1,9 @@
 #pragma once
 #include "actions.h"
 #include "../core/api.h"
+#include "../utils/fx.h"
 #include "../utils/utils.h"
+#include "../utils/misc.h"
 #include <unordered_map>
 
 void insert_4_bars_midi_item_at_cursor() {
@@ -59,19 +61,35 @@ void fx_ab_comparer() {
 		ShowConsoleMsg("true\n");
 		#endif
 	}
-	MediaTrack *track = (track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, track_id); // Master | regular
+	MediaTrack *track = (track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, track_id); // Master : regular
+	std::string guid, fx_chunk;
+
+
 	if (item_id == -1) { // track fx
-		std::string guid = guid_to_string(TrackFX_GetFXGUID(track, fx_id));
+		guid = guid_to_string(TrackFX_GetFXGUID(track, fx_id));
 		auto preset = presets.find(guid);
-		std::string fx_chunk = get_track_fx_chunk(track, fx_id);
+		fx_chunk = get_fx_chunk(track, fx_id);
 		if (preset == presets.end()) {
 			presets[guid] = fx_chunk;
 			reset_fx_preset(track, fx_id);
 		} else {
-			std::string chunk = set_track_fx_chunk(track, fx_id, preset->second);
-			SetTrackStateChunk(track, chunk.data(), false);
+			set_fx_chunk(track, fx_id, preset->second);
 			presets[guid] = fx_chunk;
 		}
 	} else { // item fx
+		MediaItem *item = GetTrackMediaItem(track, item_id);
+		MediaItem_Take *take = GetMediaItemTake(item, take_id);
+		std::string chunk;
+		guid = guid_to_string(TakeFX_GetFXGUID(take, fx_id));
+		auto preset = presets.find(guid);
+		fx_chunk = get_fx_chunk(take, fx_id);
+		if (preset == presets.end()) {
+			presets[guid] = fx_chunk;
+			reset_fx_preset(take, fx_id);
+		} else {
+			set_fx_chunk(take, fx_id, preset->second);
+			presets[guid] = fx_chunk;
+		}
+		
 	}
 };

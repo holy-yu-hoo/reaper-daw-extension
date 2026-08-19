@@ -15,6 +15,8 @@ target_sources(reaex
 	commands/actions.cpp
 	commands/commands.cpp
 	utils/utils.cpp
+	utils/misc.cpp
+	utils/fx.cpp
 )
 
 
@@ -29,7 +31,7 @@ endif ()
 
 
 add_custom_command(TARGET reaex POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+	COMMAND ${CMAKE_COMMAND} -E copy
 	$<TARGET_FILE:reaex> "${REAPER_USER_PLUGINS}/$<TARGET_FILE_NAME:reaex>"
 	VERBATIM
 )
