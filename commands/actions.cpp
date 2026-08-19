@@ -2,6 +2,7 @@
 #include "actions.h"
 #include "../core/api.h"
 #include "../utils/utils.h"
+#include <unordered_map>
 
 void insert_4_bars_midi_item_at_cursor() {
 	MediaTrack *track = nullptr;
@@ -45,6 +46,7 @@ void insert_4_bars_midi_item_at_cursor() {
 
 
 void fx_ab_comparer() {
+	static std::unordered_map<std::string, std::string> presets;
 	int track_id, item_id, take_id, fx_id, param_id;
 	bool ret = GetLastFocusedFX(&track_id, &item_id, &take_id, &fx_id, &param_id);
 	if (!ret) {
@@ -59,6 +61,17 @@ void fx_ab_comparer() {
 	}
 	MediaTrack *track = (track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, track_id); // Master | regular
 	if (item_id == -1) { // track fx
+		std::string guid = guid_to_string(TrackFX_GetFXGUID(track, fx_id));
+		auto preset = presets.find(guid);
+		std::string fx_chunk = get_track_fx_chunk(track, fx_id);
+		if (preset == presets.end()) {
+			presets[guid] = fx_chunk;
+			reset_fx_preset(track, fx_id);
+		} else {
+			std::string chunk = set_track_fx_chunk(track, fx_id, preset->second);
+			SetTrackStateChunk(track, chunk.data(), false);
+			presets[guid] = fx_chunk;
+		}
 	} else { // item fx
 	}
 };

@@ -1,6 +1,13 @@
 #include "utils.h"
 #include "../core/api.h"
 
+std::string guid_to_string(GUID *guid) {
+	std::string ret;
+	ret.resize(38);
+	guidToString(guid, ret.data());
+	return ret;
+}
+
 bool has_single_selected_track(MediaTrack *&out_track) {
 	if (CountSelectedTracks(nullptr) != 1) {
 		return false;
@@ -31,6 +38,20 @@ double bars_to_seconds(int bars, double bpm, double beats_per_bar) {
 		beats_per_bar = 4.0;
 	}
 	return (bars * beats_per_bar * 60.0) / bpm;
+}
+
+bool reset_fx_preset(MediaTrack *track, int fx) {
+	if (!TrackFX_SetPresetByIndex(track, fx, -1)) {
+		return TrackFX_SetPresetByIndex(track, fx, -2);
+	}
+	return true;
+}
+
+bool reset_fx_preset(MediaItem_Take *take, int fx) {
+	if (!TakeFX_SetPresetByIndex(take, fx, -1)) {
+		return TakeFX_SetPresetByIndex(take, fx, -2);
+	}
+	return true;
 }
 
 
@@ -79,9 +100,7 @@ std::string get_track_fx_chunk(MediaTrack *track, int fx) {
 		return "";
 	}
 
-	std::string guid;
-	guid.resize(38);
-	guidToString(TrackFX_GetFXGUID(track, fx), guid.data());
+	std::string guid = guid_to_string(TrackFX_GetFXGUID(track, fx));
 
 	if (guid.empty()) {
 		#if defined(_DEBUG)
@@ -105,9 +124,7 @@ std::string set_track_fx_chunk(MediaTrack *track, int fx, const std::string &new
 		return "";
 	}
 
-	std::string guid;
-	guid.resize(38);
-	guidToString(TrackFX_GetFXGUID(track, fx), guid.data());
+	std::string guid = guid_to_string(TrackFX_GetFXGUID(track, fx));
 
 	if (guid.empty()) {
 		#if defined(_DEBUG)
