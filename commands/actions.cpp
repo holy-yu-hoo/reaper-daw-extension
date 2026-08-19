@@ -42,3 +42,23 @@ void insert_4_bars_midi_item_at_cursor() {
 
 	UpdateArrange();
 }
+
+
+void fx_ab_comparer() {
+	int track_id, item_id, take_id, fx_id, param_id;
+	bool ret = GetLastFocusedFX(&track_id, &item_id, &take_id, &fx_id, &param_id);
+	if (!ret) {
+		#if defined(_DEBUG)
+		ShowConsoleMsg("Not focused plugin\n");
+		#endif
+		return;
+	} else {
+		#if defined(_DEBUG)
+		ShowConsoleMsg("true\n");
+		#endif
+	}
+	MediaTrack *track = (track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, track_id); // Master | regular
+	if (item_id == -1) { // track fx
+	} else { // item fx
+	}
+};

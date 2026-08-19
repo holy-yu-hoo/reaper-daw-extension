@@ -11,6 +11,7 @@ target_sources(reaex
 	PRIVATE
 	main.cpp
 	core/api_load.cpp
+	core/yh_api.cpp
 	commands/actions.cpp
 	commands/commands.cpp
 	utils/utils.cpp
