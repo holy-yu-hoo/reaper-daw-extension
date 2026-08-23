@@ -1,6 +1,5 @@
 #pragma once
-#include <reaper_plugin.h>
-#include <string>
+#include "api.h"
 
 bool reset_fx_preset(MediaTrack *track, int fx);
 

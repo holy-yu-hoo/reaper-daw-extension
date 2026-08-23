@@ -1,5 +1,5 @@
 #include "commands.h"
-#include <reaper_plugin_functions.h>
+#include "api.h"
 #include "actions/actions.h"
 #include "utils.h"
 #include "config.h"

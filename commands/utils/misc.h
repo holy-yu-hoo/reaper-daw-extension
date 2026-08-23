@@ -1,6 +1,5 @@
 #pragma once
-#include <reaper_plugin.h>
-#include <string>
+#include "api.h"
 
 std::string guid_to_string(const GUID *guid);
 

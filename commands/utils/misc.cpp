@@ -1,4 +1,3 @@
-#include <string>
 #include "api.h"
 
 bool get_state_chunk(MediaTrack *track, std::string &chunk) {

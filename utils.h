@@ -27,4 +27,4 @@ typedef struct COMMAND_T {
 
 
 bool register_commands(std::vector<COMMAND_T> &); // implement in main.cpp
-bool unregister_commands(std::vector<COMMAND_T> &commands); // implement in main.cpp
+bool unregister_commands(std::vector<COMMAND_T> & commands); // implement in main.cpp

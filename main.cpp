@@ -1,4 +1,3 @@
-#define  REAPERAPI_IMPLEMENT
 #include "api.h"
 #include "utils.h"
 #include "commands/commands.h"

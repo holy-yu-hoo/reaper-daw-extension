@@ -1,6 +1,6 @@
+#include "api.h"
 #include "fx.h"
 #include "misc.h"
-#include "api.h"
 
 
 bool reset_fx_preset(MediaTrack *track, int fx) {
