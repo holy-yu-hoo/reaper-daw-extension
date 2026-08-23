@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.30)
 project(reaex CXX)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 11)
 
 set(REAPER_USER_PLUGINS "C:/Users/yuhoo/AppData/Roaming/REAPER/UserPlugins")
 
@@ -10,13 +10,11 @@ target_include_directories(reaex PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CUR
 target_sources(reaex
 	PRIVATE
 	main.cpp
-	core/api_load.cpp
-	core/yh_api.cpp
-	commands/actions.cpp
+	commands/utils/misc.cpp
+	commands/utils/fx.cpp
 	commands/commands.cpp
-	utils/utils.cpp
-	utils/misc.cpp
-	utils/fx.cpp
+	commands/actions/actions.cpp
+	commands/actions/fx_observer.cpp
 )
 
 

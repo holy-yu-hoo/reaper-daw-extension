@@ -1,38 +1,30 @@
 #include "commands.h"
-#include "../config.h"
-#include "actions.h"
-#include <unordered_map>
+#include <reaper_plugin_functions.h>
+#include "actions/actions.h"
+#include "utils.h"
+#include "config.h"
 
 
-struct Command {
-	custom_action_register_t action;
-	ActionFunc func;
+std::vector<COMMAND_T> commands = {
+	{
+		ID_PREFIX "INSERT_4_BARS_MIDI_ITEM_AT_CURSOR",
+		NAME_PREFIX "Insert 4 bars midi item at cursor",
+		nullptr,
+		insert_4_bars_midi_item_at_cursor,
+		SECTION_MAIN,
+		nullptr
+	},
+	{ID_PREFIX "FX A/B COMPARER", NAME_PREFIX "FX A/B comparer", nullptr, fx_ab_comparer, SECTION_MAIN, nullptr}
 };
 
-
-Command commands[] = {
-	{{0, ID_PREFIX "INSERT_4_BARS_MIDI_ITEM_AT_CURSOR", NAME_PREFIX "insert 4 bars midi item at cursor", nullptr}, insert_4_bars_midi_item_at_cursor},
-	{{0,ID_PREFIX "FX_A/B_COMPARER", NAME_PREFIX "FX A/B comparer", nullptr}, fx_ab_comparer}
-};
-
-std::unordered_map<int, ActionFunc> actions;
-
-bool init_actions() {
-	actions.clear();
-
-	for (auto &command: commands) {
-		const int action_id = g_rec->Register("custom_action", static_cast<void *>(&command.action));
-		if (!action_id) {
-			return false;
-		}
-		actions[action_id] = command.func;
-	}
+bool commands_init() {
+	if (!register_commands(commands)) return false;
+	plugin_register("timer", static_cast<void *>(last_focused_fx_observer));
 	return true;
 }
 
-bool action_dispatch_hook(KbdSectionInfo *sec, int command, int val, int val2, int relmode, HWND hwnd) {
-	auto it = actions.find(command);
-	if (it == actions.end()) return false;
-	it->second();
+bool commands_exit() {
+	unregister_commands(commands);
+	plugin_register("-timer", static_cast<void *>(last_focused_fx_observer));
 	return true;
 }

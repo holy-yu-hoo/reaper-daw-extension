@@ -1,12 +1,12 @@
 #pragma once
 #include "actions.h"
-#include "../core/api.h"
+#include "api.h"
+#include "utils.h"
 #include "../utils/fx.h"
-#include "../utils/utils.h"
 #include "../utils/misc.h"
 #include <unordered_map>
 
-void insert_4_bars_midi_item_at_cursor() {
+void insert_4_bars_midi_item_at_cursor(COMMAND_T *cmd) {
 	MediaTrack *track = nullptr;
 	if (!has_single_selected_track(track)) {
 		return;
@@ -47,7 +47,7 @@ void insert_4_bars_midi_item_at_cursor() {
 }
 
 
-void fx_ab_comparer() {
+void fx_ab_comparer(COMMAND_T *cmd) {
 	static std::unordered_map<std::string, std::string> presets;
 	int track_id, item_id, take_id, fx_id, param_id;
 	bool ret = GetLastFocusedFX(&track_id, &item_id, &take_id, &fx_id, &param_id);
@@ -90,6 +90,6 @@ void fx_ab_comparer() {
 			set_fx_chunk(take, fx_id, preset->second);
 			presets[guid] = fx_chunk;
 		}
-		
+
 	}
 };
