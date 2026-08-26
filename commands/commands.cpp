@@ -1,30 +1,32 @@
-#include "commands.h"
 #include "api.h"
+#include "commands.h"
 #include "actions/actions.h"
-#include "utils.h"
 #include "config.h"
 
 
 std::vector<COMMAND_T> commands = {
-	{
-		ID_PREFIX "INSERT_4_BARS_MIDI_ITEM_AT_CURSOR",
-		NAME_PREFIX "Insert 4 bars midi item at cursor",
-		nullptr,
-		insert_4_bars_midi_item_at_cursor,
-		SECTION_MAIN,
-		nullptr
-	},
-	{ID_PREFIX "FX A/B COMPARER", NAME_PREFIX "FX A/B comparer", nullptr, fx_ab_comparer, SECTION_MAIN, nullptr}
+	{ID_PREFIX "INSERT_4_BARS_MIDI_ITEM_AT_CURSOR",NAME_PREFIX "Insert 4 bars midi item at cursor", nullptr, insert_4_bars_midi_item_at_cursor, SECTION_MAIN, nullptr},
+	{ID_PREFIX "FX_A/B_COMPARER", NAME_PREFIX "FX A/B comparer", nullptr, fx_ab_comparer, SECTION_MAIN, nullptr},
+	{ID_PREFIX "FX_CHAIN_A/B_COMPARER", NAME_PREFIX "FX chain A/B comparer", nullptr, fx_chain_ab_comparer, SECTION_MAIN, nullptr},
+	{ID_PREFIX "TOGGLE_SHOW_LAST_FOCUSED_FX",NAME_PREFIX "Toggle show last focused fx", nullptr, toggle_show_last_focused_fx, SECTION_MAIN, nullptr},
+	{ID_PREFIX "TOGGLE_SHOW_LAST_FOCUSED_FX_CHAIN",NAME_PREFIX "Toggle show last focused fx chain", nullptr, toggle_show_last_focused_fx_chain, SECTION_MAIN, nullptr},
+	{ID_PREFIX "TOGGLE_BYPASS_LAST_FOCUSED_FX",NAME_PREFIX "Toggle bypass last focused fx", nullptr, toggle_bypass_last_focused_fx, SECTION_MAIN, nullptr},
+	{ID_PREFIX "TOGGLE_BYPASS_LAST_FOCUSED_FX_CHAIN",NAME_PREFIX "Toggle bypass last focused fx chain", nullptr, toggle_bypass_last_focused_fx_chain, SECTION_MAIN, nullptr},
+	{ID_PREFIX "TOGGLE_OFFLINE_LAST_FOCUSED_FX",NAME_PREFIX "Toggle offline last focused fx", nullptr, toggle_offline_last_focused_fx, SECTION_MAIN, nullptr},
+	{ID_PREFIX "TOGGLE_OFFLINE_LAST_FOCUSED_FX_CHAIN",NAME_PREFIX "Toggle offline last focused fx chain", nullptr, toggle_offline_last_focused_fx_chain, SECTION_MAIN, nullptr},
+	{ID_PREFIX "DELETE_LAST_FOCUSED_FX",NAME_PREFIX "Delete last focused fx", nullptr, delete_last_focused_fx, SECTION_MAIN, nullptr},
+	{ID_PREFIX "DELETE_LAST_FOCUSED_FX_CHAIN",NAME_PREFIX "Delete last focused fx chain", nullptr, delete_last_focused_fx_chain, SECTION_MAIN, nullptr},
 };
 
 bool commands_init() {
 	if (!register_commands(commands)) return false;
-	plugin_register("timer", static_cast<void *>(last_focused_fx_observer));
+	// LAST_FOCUSED_FX::init();
+	plugin_register("timer", static_cast<void *>(LAST_FOCUSED_FX::last_focused_fx_observer));
 	return true;
 }
 
 bool commands_exit() {
 	unregister_commands(commands);
-	plugin_register("-timer", static_cast<void *>(last_focused_fx_observer));
+	plugin_register("-timer", static_cast<void *>(LAST_FOCUSED_FX::last_focused_fx_observer));
 	return true;
 }

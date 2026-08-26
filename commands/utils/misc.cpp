@@ -27,8 +27,9 @@ bool get_state_chunk(MediaItem *item, std::string &chunk) {
 
 std::string guid_to_string(const GUID *guid) {
 	std::string ret;
-	ret.resize(38);
+	ret.resize(64);
 	guidToString(guid, &ret.front());
+	ret.resize(strlen(ret.data()));
 	return ret;
 }
 
@@ -62,4 +63,12 @@ double bars_to_seconds(int bars, double bpm, double beats_per_bar) {
 		beats_per_bar = 4.0;
 	}
 	return (bars * beats_per_bar * 60.0) / bpm;
+}
+
+std::string get_set_media_track_info_string(MediaTrack *tr, const char *parmname, bool setNewValue) {
+	std::string str;
+	str.resize(4096);
+	GetSetMediaTrackInfo_String(tr, parmname, &str.front(), setNewValue);
+	str.resize((strlen(str.data())));
+	return str;
 }

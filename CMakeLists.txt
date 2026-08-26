@@ -15,17 +15,15 @@ set(SOURCES
 	commands/utils/fx.cpp
 	commands/commands.cpp
 	commands/actions/actions.cpp
-	commands/actions/fx_observer.cpp
+	commands/actions/fx.cpp
 )
 
 set(HEADERS
 	api.h
-	utils.h
 	commands/commands.h
 	commands/utils/fx.h
 	commands/utils/misc.h
 	commands/actions/actions.h
-	commands/actions/fx_observer.h
 )
 
 
@@ -48,6 +46,7 @@ if (MSVC)
 		COMPILE_OPTIONS "/Yc${PCH_INPUT};/Fp${PCH_OUTPUT}"
 		OBJECT_OUTPUTS "${PCH_OUTPUT}"
 	)
+	target_compile_options(reaex PRIVATE /permissive-)
 endif ()
 
 if (WIN32)

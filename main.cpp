@@ -1,11 +1,10 @@
 #include "api.h"
-#include "utils.h"
 #include "commands/commands.h"
 
 
-reaper_plugin_info_t *g_rec = nullptr;
+static reaper_plugin_info_t *g_rec = nullptr;
 
-std::vector<COMMAND_T> g_commands = {};
+static std::vector<COMMAND_T> g_commands = {};
 
 bool register_commands(std::vector<COMMAND_T> &commands) {
 	static custom_action_register_t car{0};
@@ -35,12 +34,13 @@ bool unregister_commands(std::vector<COMMAND_T> &commands) {
 
 
 static bool hook_command_proc_2(KbdSectionInfo *sec, int cmd, int val, int val2, int relmode, HWND hwnd) {
-	auto act = std::find_if(g_commands.begin(), g_commands.end(), [cmd](COMMAND_T command) { return command.cmd_id == cmd; });
-	if (act == std::end(g_commands)) {
-		return false;
+	auto act = std::find_if(g_commands.begin(), g_commands.end(), [cmd](const COMMAND_T &command) { return command.cmd_id == cmd; });
+	if (act != std::end(g_commands)) {
+		act->do_command(&*act);
+		return true;
 	}
-	act->do_command(&*act);
-	return true;
+
+	return false;
 }
 
 static void import_extension_api();
@@ -59,7 +59,9 @@ static void Init() {
 }
 
 static void Exit() {
+	#ifdef _DEBUG
 	ShowConsoleMsg("EXIT");
+	#endif
 	g_rec->Register("-timer", static_cast<void *>(import_extension_api));
 	g_rec->Register("-hookcommand2", static_cast<void *>(&hook_command_proc_2));
 	g_rec->Register("-atexit", static_cast<void *>(Exit));
@@ -72,6 +74,12 @@ static void import_extension_api() {
 	plugin_register("-timer", static_cast<void *>(import_extension_api));
 	SWS_API(BR_GetMouseCursorContext);
 	SWS_API(BR_TrackAtMouseCursor);
+	SWS_API(BR_GetMediaTrackGUID);
+	SWS_API(BR_GetMediaItemGUID);
+	SWS_API(BR_GetMediaItemTakeGUID);
+	SWS_API(CF_GetTrackFXChainEx);
+	SWS_API(CF_GetTakeFXChain);
+	SWS_API(CF_GetFocusedFXChain);
 
 }
 

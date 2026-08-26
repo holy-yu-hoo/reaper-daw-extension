@@ -12,3 +12,5 @@ bool has_single_selected_track(MediaTrack *&out_track);
 bool is_track_under_mouse(MediaTrack *track, int *context_out = nullptr);
 
 double bars_to_seconds(int bars, double bpm, double beats_per_bar);
+
+std::string get_set_media_track_info_string(MediaTrack *tr, const char *parmname, bool setNewValue);
