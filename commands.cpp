@@ -16,6 +16,10 @@ std::vector<COMMAND_T> commands = {
 	{ID_PREFIX "TOGGLE_OFFLINE_LAST_FOCUSED_FX_CHAIN",NAME_PREFIX "Toggle offline last focused fx chain", nullptr, toggle_offline_last_focused_fx_chain, SECTION_MAIN, nullptr},
 	{ID_PREFIX "DELETE_LAST_FOCUSED_FX",NAME_PREFIX "Delete last focused fx", nullptr, delete_last_focused_fx, SECTION_MAIN, nullptr},
 	{ID_PREFIX "DELETE_LAST_FOCUSED_FX_CHAIN",NAME_PREFIX "Delete last focused fx chain", nullptr, delete_last_focused_fx_chain, SECTION_MAIN, nullptr},
+	{ID_PREFIX "SAVE_HORIZONTAL_ZOOM_MODE", NAME_PREFIX "Save horizontal zoom mode", nullptr, save_hor_zoom_mode, SECTION_MAIN,},
+	{ID_PREFIX "RESTORE_HORIZONTAL_ZOOM_MODE", NAME_PREFIX "Restore horizontal zoom mode", nullptr, restore_hor_zoom_mode, SECTION_MAIN,},
+	{ID_PREFIX "SAVE_VERTICAL_ZOOM_MODE", NAME_PREFIX "Save vertical zoom mode", nullptr, save_ver_zoom_mode, SECTION_MAIN,},
+	{ID_PREFIX "RESTORE_VERTICAL_ZOOM_MODE", NAME_PREFIX "Restore vertical zoom mode", nullptr, restore_ver_zoom_mode, SECTION_MAIN,},
 };
 
 bool commands_init() {

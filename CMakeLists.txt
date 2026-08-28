@@ -11,19 +11,21 @@ set(SOURCES
 	main.cpp
 	api.cpp
 	reaper.cpp
-	commands/utils/misc.cpp
-	commands/utils/fx.cpp
-	commands/commands.cpp
-	commands/actions/actions.cpp
-	commands/actions/fx.cpp
+	utils/misc.cpp
+	utils/fx.cpp
+	commands.cpp
+	actions/actions.cpp
+	actions/fx.cpp
+	actions/misc.cpp
 )
 
 set(HEADERS
 	api.h
-	commands/commands.h
-	commands/utils/fx.h
-	commands/utils/misc.h
-	commands/actions/actions.h
+	commands.h
+	utils/fx.h
+	utils/misc.h
+	actions/actions.h
+	actions/misc.h
 )
 
 
