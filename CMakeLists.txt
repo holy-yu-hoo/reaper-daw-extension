@@ -33,7 +33,7 @@ set(HEADERS
 	actions/actions.h
 	actions/misc.h
 	midi/midi.h
-	midi/utils.р
+	midi/utils.h
 )
 
 

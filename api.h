@@ -2,7 +2,9 @@
 #define _API_H_
 #include <vector>
 #include <string>
+#include <map>
 #include <unordered_map>
+#include <algorithm>
 #include <iso646.h>
 
 #include <reaper_plugin_functions.h>
@@ -22,11 +24,11 @@ REAPER_EXTRA_API_DECL void (*BR_GetMediaItemGUID)(MediaItem* item, char* guidStr
 
 REAPER_EXTRA_API_DECL void (*BR_GetMediaItemTakeGUID)(MediaItem_Take* take, char* guidStringOut, int guidStringOut_sz);
 
-REAPER_EXTRA_API_DECL HWND(*CF_GetTrackFXChainEx)(ReaProject* project, MediaTrack* track, bool wantInputChain);
+REAPER_EXTRA_API_DECL HWND (*CF_GetTrackFXChainEx)(ReaProject* project, MediaTrack* track, bool wantInputChain);
 
-REAPER_EXTRA_API_DECL HWND(*CF_GetTakeFXChain)(MediaItem_Take* take);
+REAPER_EXTRA_API_DECL HWND (*CF_GetTakeFXChain)(MediaItem_Take* take);
 
-REAPER_EXTRA_API_DECL HWND(*CF_GetFocusedFXChain)();
+REAPER_EXTRA_API_DECL HWND (*CF_GetFocusedFXChain)();
 
 
 constexpr int SECTION_MAIN = 0;
@@ -41,15 +43,19 @@ typedef struct COMMAND_T {
 	const char* id;
 	const char* name;
 	const char* menu_text;
+
 	void (*do_command)(COMMAND_T*);
+
 	int unique_section_id;
+
 	void (*on_action)(COMMAND_T*, int, int, int, HWND);
+
 	int cmd_id;
 	INT_PTR user;
 } COMMAND_T;
 
 
-bool register_commands(std::vector<COMMAND_T>&); // implement in main.cpp
-bool unregister_commands(std::vector<COMMAND_T>& commands); // implement in main.cpp
+bool register_commands(std::vector<COMMAND_T> &); // implement in main.cpp
+bool unregister_commands(std::vector<COMMAND_T> &commands); // implement in main.cpp
 
 #endif
