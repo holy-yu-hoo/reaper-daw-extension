@@ -22,6 +22,7 @@ set(SOURCES
 	actions/fx.cpp
 	actions/misc.cpp
 	midi/midi.cpp
+	midi/utils.cpp
 )
 
 set(HEADERS
@@ -32,6 +33,7 @@ set(HEADERS
 	actions/actions.h
 	actions/misc.h
 	midi/midi.h
+	midi/utils.р
 )
 
 

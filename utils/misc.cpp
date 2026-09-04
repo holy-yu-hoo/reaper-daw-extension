@@ -1,6 +1,6 @@
 #include "api.h"
 
-bool get_state_chunk(MediaTrack *track, std::string &chunk) {
+bool get_state_chunk(MediaTrack* track, std::string& chunk) {
 	chunk.clear();
 	chunk.resize(4096);
 	bool ret = GetTrackStateChunk(track, &chunk.front(), static_cast<int>(chunk.size()), false);
@@ -12,7 +12,7 @@ bool get_state_chunk(MediaTrack *track, std::string &chunk) {
 	return ret;
 }
 
-bool get_state_chunk(MediaItem *item, std::string &chunk) {
+bool get_state_chunk(MediaItem* item, std::string& chunk) {
 	chunk.clear();
 	chunk.resize(4096);
 	bool ret = GetItemStateChunk(item, &chunk.front(), static_cast<int>(chunk.size()), false);
@@ -25,7 +25,7 @@ bool get_state_chunk(MediaItem *item, std::string &chunk) {
 }
 
 
-std::string guid_to_string(const GUID *guid) {
+std::string guid_to_string(const GUID* guid) {
 	std::string ret;
 	ret.resize(64);
 	guidToString(guid, &ret.front());
@@ -33,7 +33,7 @@ std::string guid_to_string(const GUID *guid) {
 	return ret;
 }
 
-bool has_single_selected_track(MediaTrack *&out_track) {
+bool has_single_selected_track(MediaTrack*& out_track) {
 	if (CountSelectedTracks(nullptr) != 1) {
 		return false;
 	}
@@ -41,12 +41,12 @@ bool has_single_selected_track(MediaTrack *&out_track) {
 	return out_track != nullptr;
 }
 
-bool is_track_under_mouse(MediaTrack *track, int *context_out) {
+bool is_track_under_mouse(MediaTrack* track, int* context_out) {
 	if (!BR_TrackAtMouseCursor) {
 		return false;
 	}
 	int context = 0;
-	const MediaTrack *hovered = BR_TrackAtMouseCursor(&context, nullptr);
+	const MediaTrack* hovered = BR_TrackAtMouseCursor(&context, nullptr);
 	if (context_out) {
 		*context_out = context;
 	}
@@ -65,10 +65,80 @@ double bars_to_seconds(int bars, double bpm, double beats_per_bar) {
 	return (bars * beats_per_bar * 60.0) / bpm;
 }
 
-std::string get_set_media_track_info_string(MediaTrack *tr, const char *parmname, bool setNewValue) {
+std::string get_set_media_track_info_string(MediaTrack* tr, const char* parmname, bool setNewValue) {
 	std::string str;
 	str.resize(4096);
 	GetSetMediaTrackInfo_String(tr, parmname, &str.front(), setNewValue);
 	str.resize((strlen(str.data())));
 	return str;
+}
+
+
+bool is_grid_triplet() { // ╤Б╨┐╨╕╤Б╨░╨╜╨╛ ╨╕╨╖ SWS
+	int size = 0;
+	int offset = projectconfig_var_getoffs("projgriddiv", &size);
+	void* addr = projectconfig_var_addr(nullptr, offset);
+	double grid = *static_cast<double*>(addr);
+	if (grid < 1e8) return 0;
+	double n = 1.0 / grid;
+
+	while (n < 3.0) { n *= 2.0; }
+
+	double r = fmod(n, 3.0);
+	return r < 0.000001 || r > 2.99999;
+
+}
+
+bool is_grid_dotted() { // ╤Б╨┐╨╕╤Б╨░╨╜╨╛ ╨╕╨╖ SWS
+	int size = 0;
+	int offset = projectconfig_var_getoffs("projgriddiv", &size);
+	void* addr = projectconfig_var_addr(nullptr, offset);
+	double grid = *static_cast<double*>(addr);
+	if (grid < 1e8) return 0;
+	double n = 1.0 / grid;
+
+	while (n < (2.0 / 3.0)) { n *= 2.0; }
+	while (n > (4.0 / 3.0)) { n *= 0.5; }
+
+	double r = fmod(n, (2.0 / 3.0));
+	return r < 0.000001 || r > 0.66666;
+
+}
+
+bool is_grid_swing() { // ╤Б╨┐╨╕╤Б╨░╨╜╨╛ ╨╕╨╖ SWS
+	int size = 0;
+	int offset = projectconfig_var_getoffs("projgridframe", &size);
+	void* addr = projectconfig_var_addr(nullptr, offset);
+	int frame = *static_cast<int*>(addr);
+	return (frame & 8 == 1);
+
+}
+
+double get_grid_swing() {
+	int size = 0;
+	int offset = projectconfig_var_getoffs("projgridswing", &size);
+	void* addr = projectconfig_var_addr(nullptr, offset);
+	double swing = *static_cast<double*>(addr);
+	return swing;
+
+}
+
+int get_grid_type() {
+	if (is_grid_triplet()) {
+		return 2;
+
+	}
+	else if (is_grid_dotted()) {
+		return 4;
+
+	}
+	else if (is_grid_swing()) {
+		return 8;
+
+	}
+	else {
+		return 0;
+
+	}
+
 }
