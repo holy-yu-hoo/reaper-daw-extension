@@ -5,7 +5,11 @@ set(CMAKE_CXX_STANDARD 11)
 set(REAPER_USER_PLUGINS "C:/Users/yuhoo/AppData/Roaming/REAPER/UserPlugins")
 
 add_library(reaex MODULE)
-target_include_directories(reaex PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/sdk)
+
+target_include_directories(reaex
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/sdk
+)
 
 set(SOURCES
 	main.cpp
@@ -17,6 +21,7 @@ set(SOURCES
 	actions/actions.cpp
 	actions/fx.cpp
 	actions/misc.cpp
+	midi/midi.cpp
 )
 
 set(HEADERS
@@ -26,6 +31,7 @@ set(HEADERS
 	utils/misc.h
 	actions/actions.h
 	actions/misc.h
+	midi/midi.h
 )
 
 
@@ -65,4 +71,3 @@ add_custom_command(TARGET reaex POST_BUILD
 	$<TARGET_FILE:reaex> "${REAPER_USER_PLUGINS}/$<TARGET_FILE_NAME:reaex>"
 	VERBATIM
 )
-

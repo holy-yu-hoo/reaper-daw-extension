@@ -1,0 +1,1 @@
+int get_swing_mode(MediaItem_Take* take);

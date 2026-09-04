@@ -1,6 +1,7 @@
 #include "api.h"
 #include "commands.h"
 #include "actions/actions.h"
+#include "midi/midi.h"
 #include "config.h"
 
 
@@ -20,17 +21,21 @@ std::vector<COMMAND_T> commands = {
 	{ID_PREFIX "RESTORE_HORIZONTAL_ZOOM_MODE", NAME_PREFIX "Restore horizontal zoom mode", nullptr, restore_hor_zoom_mode, SECTION_MAIN,},
 	{ID_PREFIX "SAVE_VERTICAL_ZOOM_MODE", NAME_PREFIX "Save vertical zoom mode", nullptr, save_ver_zoom_mode, SECTION_MAIN,},
 	{ID_PREFIX "RESTORE_VERTICAL_ZOOM_MODE", NAME_PREFIX "Restore vertical zoom mode", nullptr, restore_ver_zoom_mode, SECTION_MAIN,},
+	{ID_PREFIX "FILL_EACH_2_STEPS", NAME_PREFIX "fill each 2 steps", nullptr, fill_each_n_steps, SECTION_MIDI_EDITOR,nullptr,0,2},
+	{ID_PREFIX "FILL_EACH_4_STEPS", NAME_PREFIX "fill each 4 steps", nullptr, fill_each_n_steps, SECTION_MIDI_EDITOR,nullptr,0,4},
+	{ID_PREFIX "FILL_EACH_8_STEPS", NAME_PREFIX "fill each 8 steps", nullptr, fill_each_n_steps, SECTION_MIDI_EDITOR,nullptr,0,8},
+	{ID_PREFIX "FILL_EACH_16_STEPS", NAME_PREFIX "fill each 16 steps", nullptr, fill_each_n_steps, SECTION_MIDI_EDITOR,nullptr,0,16},
 };
 
 bool commands_init() {
 	if (!register_commands(commands)) return false;
 	// LAST_FOCUSED_FX::init();
-	plugin_register("timer", static_cast<void *>(LAST_FOCUSED_FX::last_focused_fx_observer));
+	plugin_register("timer", static_cast<void*>(LAST_FOCUSED_FX::last_focused_fx_observer));
 	return true;
 }
 
 bool commands_exit() {
 	unregister_commands(commands);
-	plugin_register("-timer", static_cast<void *>(LAST_FOCUSED_FX::last_focused_fx_observer));
+	plugin_register("-timer", static_cast<void*>(LAST_FOCUSED_FX::last_focused_fx_observer));
 	return true;
 }
