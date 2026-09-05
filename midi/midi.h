@@ -9,3 +9,5 @@ void note_stutter_incr(COMMAND_T* cmd);
 void note_stutter_decr(COMMAND_T* cmd);
 
 void note_stutter_mousewheel(COMMAND_T* cmd, int val, int val2, int relmode, HWND hwnd);
+
+void set_loop_time_range_to_active_take(COMMAND_T* cmd);

@@ -47,8 +47,8 @@ std::vector<COMMAND_T> commands = {
 	{ID_PREFIX "NOTE_STUTTER_MOUSEWHEEL", NAME_PREFIX "Note stutter (Midi relative/mousewheel)", nullptr, nullptr, SECTION_MIDI_EDITOR, note_stutter_mousewheel,},
 	{ID_PREFIX "RIPPLE_PER_TRACK_DELETE_ITEMS", NAME_PREFIX "Ripple per track delete items", nullptr, delete_items_ripple_per_track, SECTION_MAIN,},
 	{ID_PREFIX "RIPPLE_ALL_TRACK_DELETE_ITEMS", NAME_PREFIX "Ripple all track delete items", nullptr, delete_items_ripple_all_track, SECTION_MAIN,},
-
-
+	{ID_PREFIX "SET_LOOP_POINTS_TO_ACTIVE_MIDI_TAKE", NAME_PREFIX "Set loop points to active midi take", nullptr, set_loop_time_range_to_active_take, SECTION_MIDI_EDITOR,nullptr,0,1},
+	{ID_PREFIX "SET_TIME_SELECTION_TO_ACTIVE_MIDI_TAKE", NAME_PREFIX "Set time selection to active midi take", nullptr, set_loop_time_range_to_active_take, SECTION_MIDI_EDITOR,nullptr,0,0},
 };
 
 bool commands_init() {

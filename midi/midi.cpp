@@ -251,3 +251,14 @@ void note_stutter_mousewheel(COMMAND_T* cmd, int val, int val2, int relmode, HWN
 		note_stutter_decr(cmd);
 	}
 }
+
+
+void set_loop_time_range_to_active_take(COMMAND_T* cmd) {
+	HWND hwnd = MIDIEditor_GetActive();
+	if (!hwnd) return;
+	MediaItem_Take* take = MIDIEditor_GetTake(hwnd);
+	if (!take) return;
+	MediaItem* item = GetMediaItemTake_Item(take);
+	double start = GetMediaItemInfo_Value(item, "D_POSITION"), end = start + GetMediaItemInfo_Value(item, "D_LENGTH");
+	GetSet_LoopTimeRange2(nullptr, true, cmd->user, &start, &end, true);
+}
