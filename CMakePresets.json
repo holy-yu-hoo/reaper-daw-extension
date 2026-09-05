@@ -1,44 +1,44 @@
 {
 	"version": 6,
 	"configurePresets": [
-	{
-		"name": "base-msvc",
-		"hidden": true,
-		"generator": "Visual Studio 18 2026",
-		"architecture": "x64",
-		"toolset": "host=x64"
-	},
-	{
-		"name": "vs-msvc-debug",
-		"displayName": "MSVC x64 Debug",
-		"inherits": "base-msvc",
-		"binaryDir": "${sourceDir}/build-debug",
-		"cacheVariables": {
-			"CMAKE_BUILD_TYPE": "Debug"
+		{
+			"name": "base-msvc",
+			"hidden": true,
+			"generator": "Visual Studio 18 2026",
+			"architecture": "x64",
+			"toolset": "host=x64"
+		},
+		{
+			"name": "vs-msvc-debug",
+			"displayName": "MSVC x64 Debug",
+			"inherits": "base-msvc",
+			"binaryDir": "${sourceDir}/build-debug",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "vs-msvc-release",
+			"displayName": "MSVC x64 Release",
+			"inherits": "base-msvc",
+			"binaryDir": "${sourceDir}/build-release",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
 		}
-	},
-	{
-		"name": "vs-msvc-release",
-		"displayName": "MSVC x64 Release",
-		"inherits": "base-msvc",
-		"binaryDir": "${sourceDir}/build-release",
-		"cacheVariables": {
-			"CMAKE_BUILD_TYPE": "Release"
+	],
+	"buildPresets": [
+		{
+			"name": "build-debug",
+			"displayName": "Build Debug",
+			"configurePreset": "vs-msvc-debug",
+			"configuration": "Debug"
+		},
+		{
+			"name": "build-release",
+			"displayName": "Build Release",
+			"configurePreset": "vs-msvc-release",
+			"configuration": "Release"
 		}
-	}
-],
-"buildPresets": [
-	{
-		"name": "build-debug",
-		"displayName": "Build Debug",
-		"configurePreset": "vs-msvc-debug",
-		"configuration": "Debug"
-	},
-	{
-		"name": "build-release",
-		"displayName": "Build Release",
-		"configurePreset": "vs-msvc-release",
-		"configuration": "Release"
-	}
-]
+	]
 }

@@ -4,6 +4,8 @@
 #include "utils/misc.h"
 
 using std::operator""s;
+using std::vector;
+using std::unordered_map;
 
 void fill_each_n_steps(MediaItem_Take* take, float step, double len, bool sel = false, bool mute = false, int chan = 0, int pitch = 60, int vel = 127) {
 	MediaItem* item = GetMediaItemTake_Item(take);
@@ -139,61 +141,63 @@ struct MidiNote {
 	int chan, pitch, vel;
 };
 
-
 constexpr double epsilon = 1e-8; // for small diff between notes
 
-void note_stutter_incr(COMMAND_T* cmd) {
-	HWND hwnd = MIDIEditor_GetActive();
-	if (!hwnd) return;
-	MediaItem_Take* take = MIDIEditor_GetTake(hwnd);
-	if (!take) return;
-
+bool generate_data(MediaItem_Take* take, unordered_map<int, vector<vector<MidiNote>>>* data) {
 	int n = MIDI_EnumSelNotes(take, -1);
-	if (n < 0) return;
-	std::vector<std::vector<MidiNote>> data[128][16];
+	if (n < 0) return false;
 	bool sel;
 	MidiNote note;
 	while (n >= 0) {
 		note.idx = n;
 		MIDI_GetNote(take, n, &sel, &note.mute, &note.start_pos, &note.end_pos, &note.chan, &note.pitch, &note.vel);
-		if (data[note.pitch][note.chan].empty()) {
-			data[note.pitch][note.chan] = { {note} };
+		if ((*data)[note.pitch].empty()) {
+			(*data)[note.pitch] = { {note} };
 		} else {
-			std::vector<std::vector<MidiNote>>& line = data[note.pitch][note.chan];
+			vector<vector<MidiNote>>& line = (*data)[note.pitch];
 			if (note.start_pos - line.back().back().end_pos <= epsilon) {
 				line.back().push_back(note);
 			} else {
 				line.push_back({ note });
 			}
 		}
+
 		n = MIDI_EnumSelNotes(take, n);
 	}
+	return true;
+}
+
+void note_stutter_incr(COMMAND_T* cmd) {
+	HWND hwnd = MIDIEditor_GetActive();
+	if (!hwnd) return;
+	MediaItem_Take* take = MIDIEditor_GetTake(hwnd);
+	if (!take) return;
+	unordered_map<int, vector<vector<MidiNote>>> data;
+	if (!generate_data(take, &data)) return;
 
 	MIDI_DisableSort(take);
 	int new_count;
 	double new_start, new_end, new_len;
-	sel = true;
+	bool sel = true;
+	MidiNote note;
 	Undo_BeginBlock2(nullptr);
-	for (const auto& a : data) {
-		for (const auto& b : a) {
-			for (const auto& v : b) {
-				new_count = v.size();
-				new_start = v.front().start_pos, new_end = v.back().end_pos;
-				new_len = (new_end - new_start) / (new_count + 1);
-				for (int i = 0; i < new_count; i++) {
-					new_end = new_start + new_len;
-					note = v[i];
-					MIDI_SetNote(take, note.idx, &sel, &note.mute, &new_start, &new_end, &note.chan, &note.pitch, &note.vel, nullptr);
-					new_start = new_start + new_len;
-				}
-				MIDI_InsertNote(take, true, note.mute, new_end, v.back().end_pos, note.chan, note.pitch, note.vel, nullptr);
+	for (const auto& b : data) {
+		for (const auto& v : b.second) {
+			new_count = v.size();
+			new_start = v.front().start_pos, new_end = v.back().end_pos;
+			new_len = (new_end - new_start) / (new_count + 1);
+			for (int i = 0; i < new_count; i++) {
+				new_end = new_start + new_len;
+				note = v[i];
+				MIDI_SetNote(take, note.idx, &sel, &note.mute, &new_start, &new_end, &note.chan, &note.pitch, &note.vel, nullptr);
+				new_start = new_start + new_len;
 			}
+			MIDI_InsertNote(take, true, note.mute, new_end, v.back().end_pos, note.chan, note.pitch, note.vel, nullptr);
 		}
 	}
 	Undo_EndBlock2(nullptr, "Midi note stutter increment", 2);
 	MIDI_Sort(take);
 }
-
 
 void note_stutter_decr(COMMAND_T* cmd) {
 	HWND hwnd = MIDIEditor_GetActive();
@@ -202,44 +206,25 @@ void note_stutter_decr(COMMAND_T* cmd) {
 	if (!take) return;
 	int n = MIDI_EnumSelNotes(take, -1);
 	if (n < 0) return;
-	std::unordered_map<int, std::vector<std::vector<MidiNote>>> data; // сортировка по каналам не нужна
-	bool sel;
-	MidiNote note;
-	while (n >= 0) {
-		note.idx = n;
-		MIDI_GetNote(take, n, &sel, &note.mute, &note.start_pos, &note.end_pos, &note.chan, &note.pitch, &note.vel);
-		if (data[note.pitch].empty()) {
-			data[note.pitch] = { {note} };
-		} else {
-			std::vector<std::vector<MidiNote>>& line = data[note.pitch];
-			if (note.start_pos - line.back().back().end_pos <= epsilon) {
-				line.back().push_back(note);
-			} else {
-				line.push_back({ note });
-			}
-		}
+	unordered_map<int, vector<vector<MidiNote>>> data;
+	if (!generate_data(take, &data)) return;
 
-		n = MIDI_EnumSelNotes(take, n);
-	}
-
-
-	std::vector<std::vector<MidiNote>> s_data;
+	vector<vector<MidiNote>> s_data;
 	for (const auto& p_line : data) {
 		for (const auto& line : p_line.second) {
 			if (line.size() > 1) {
-				s_data.push_back(std::move(line));
+				s_data.push_back(move(line));
 			}
 		}
 	}
-
 	if (s_data.empty()) return;
 	std::sort(s_data.begin(), s_data.end(), [](const std::vector<MidiNote>& a, const std::vector<MidiNote>& b) { return a.back().idx < b.back().idx; });
-
 
 	MIDI_DisableSort(take);
 	int new_count;
 	double new_start, new_end, new_len;
-	sel = true;
+	bool sel = true;
+	MidiNote note;
 	Undo_BeginBlock2(nullptr);
 	for (auto line = s_data.rbegin(); line != s_data.rend(); ++line) {
 		if ((new_count = line->size()) == 1) continue;
