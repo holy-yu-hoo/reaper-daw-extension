@@ -2,6 +2,7 @@
 #include "commands.h"
 #include "actions/actions.h"
 #include "midi/midi.h"
+#include "item/item.h"
 #include "config.h"
 
 
@@ -44,6 +45,9 @@ std::vector<COMMAND_T> commands = {
 	{ID_PREFIX "NOTE_STUTTER_INCR", NAME_PREFIX "Note stutter increment", nullptr, note_stutter_incr, SECTION_MIDI_EDITOR,},
 	{ID_PREFIX "NOTE_STUTTER_DECR", NAME_PREFIX "Note stutter decrement", nullptr, note_stutter_decr, SECTION_MIDI_EDITOR,},
 	{ID_PREFIX "NOTE_STUTTER_MOUSEWHEEL", NAME_PREFIX "Note stutter (Midi relative/mousewheel)", nullptr, nullptr, SECTION_MIDI_EDITOR, note_stutter_mousewheel,},
+	{ID_PREFIX "RIPPLE_PER_TRACK_DELETE_ITEMS", NAME_PREFIX "Ripple per track delete items", nullptr, delete_items_ripple_per_track, SECTION_MAIN,},
+	{ID_PREFIX "RIPPLE_ALL_TRACK_DELETE_ITEMS", NAME_PREFIX "Ripple all track delete items", nullptr, delete_items_ripple_all_track, SECTION_MAIN,},
+
 
 };
 
