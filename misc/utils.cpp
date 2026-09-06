@@ -33,7 +33,11 @@ std::string guid_to_string(const GUID* guid) {
 	return ret;
 }
 
-bool has_single_selected_track(MediaTrack*& out_track) {
+void string_to_guid(const std::string &s_guid, GUID* guid) {
+	stringToGuid(s_guid.data(), guid);
+}
+
+bool has_single_selected_track(MediaTrack*&out_track) {
 	if (CountSelectedTracks(nullptr) != 1) {
 		return false;
 	}

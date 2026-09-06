@@ -3,7 +3,7 @@
 
 #include <api.h>
 
-#include "utils/misc.h"
+#include "utils/utils.h"
 
 int get_selected_fx(MediaTrack* track, bool rec) {
 	std::string chunk;

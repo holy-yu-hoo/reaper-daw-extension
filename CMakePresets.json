@@ -10,7 +10,7 @@
 		},
 		{
 			"name": "vs-msvc-debug",
-			"displayName": "MSVC x64 Debug",
+			"displayName": "MSVC Debug",
 			"inherits": "base-msvc",
 			"binaryDir": "${sourceDir}/build-debug",
 			"cacheVariables": {
@@ -19,7 +19,7 @@
 		},
 		{
 			"name": "vs-msvc-release",
-			"displayName": "MSVC x64 Release",
+			"displayName": "MSVC Release",
 			"inherits": "base-msvc",
 			"binaryDir": "${sourceDir}/build-release",
 			"cacheVariables": {
@@ -30,13 +30,13 @@
 	"buildPresets": [
 		{
 			"name": "build-debug",
-			"displayName": "Build Debug",
+			"displayName": "Debug",
 			"configurePreset": "vs-msvc-debug",
 			"configuration": "Debug"
 		},
 		{
 			"name": "build-release",
-			"displayName": "Build Release",
+			"displayName": "Release",
 			"configurePreset": "vs-msvc-release",
 			"configuration": "Release"
 		}

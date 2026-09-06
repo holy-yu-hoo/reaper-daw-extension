@@ -2,6 +2,7 @@
 #define _API_H_
 #include <vector>
 #include <string>
+#include <memory>
 #include <map>
 #include <unordered_map>
 #include <algorithm>
@@ -24,11 +25,11 @@ REAPER_EXTRA_API_DECL void (*BR_GetMediaItemGUID)(MediaItem* item, char* guidStr
 
 REAPER_EXTRA_API_DECL void (*BR_GetMediaItemTakeGUID)(MediaItem_Take* take, char* guidStringOut, int guidStringOut_sz);
 
-REAPER_EXTRA_API_DECL HWND (*CF_GetTrackFXChainEx)(ReaProject* project, MediaTrack* track, bool wantInputChain);
+REAPER_EXTRA_API_DECL HWND(*CF_GetTrackFXChainEx)(ReaProject* project, MediaTrack* track, bool wantInputChain);
 
-REAPER_EXTRA_API_DECL HWND (*CF_GetTakeFXChain)(MediaItem_Take* take);
+REAPER_EXTRA_API_DECL HWND(*CF_GetTakeFXChain)(MediaItem_Take* take);
 
-REAPER_EXTRA_API_DECL HWND (*CF_GetFocusedFXChain)();
+REAPER_EXTRA_API_DECL HWND(*CF_GetFocusedFXChain)();
 
 
 constexpr int SECTION_MAIN = 0;
@@ -55,7 +56,7 @@ typedef struct COMMAND_T {
 } COMMAND_T;
 
 
-bool register_commands(std::vector<COMMAND_T> &); // implement in main.cpp
-bool unregister_commands(std::vector<COMMAND_T> &commands); // implement in main.cpp
+bool register_commands(std::vector<COMMAND_T>&); // implement in main.cpp
+bool unregister_commands(std::vector<COMMAND_T>& commands); // implement in main.cpp
 
 #endif

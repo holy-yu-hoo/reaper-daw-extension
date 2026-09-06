@@ -1,29 +1,29 @@
 #include "api.h"
 #include "fx.h"
-#include "../utils/misc.h"
+#include "../misc/utils.h"
 #include "../utils/fx.h"
 
 bool only_if_open = true; // Applies the action only if the plugin window is open
 bool hide_fx_if_chain_not_open = true; // Hides the plugin window instead of the effect chain window if the effect chain window is hidden and fx is visible
 
 
-void toggle_show_last_focused_fx(COMMAND_T *cmd) {
-	const FX *fx = LAST_FOCUSED_FX::get_last_focused_fx();
+void toggle_show_last_focused_fx(COMMAND_T* cmd) {
+	const FX* fx = LAST_FOCUSED_FX::get_last_focused_fx();
 	if (fx->is_valid()) {
-		MediaTrack *track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
+		MediaTrack* track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
 		if (!fx->is_take_fx()) { // track fx
 			TrackFX_SetOpen(track, fx->fx_id, !TrackFX_GetOpen(track, fx->fx_id));
 		} else {
-			MediaItem_Take *take = GetMediaItemTake(GetTrackMediaItem(track, fx->item_id), fx->take_id);
+			MediaItem_Take* take = GetMediaItemTake(GetTrackMediaItem(track, fx->item_id), fx->take_id);
 			TakeFX_SetOpen(take, fx->fx_id, !TakeFX_GetOpen(take, fx->fx_id));
 		}
 	}
 }
 
-void toggle_show_last_focused_fx_chain(COMMAND_T *cmd) {
-	const FX *fx = LAST_FOCUSED_FX::get_last_focused_fx();
+void toggle_show_last_focused_fx_chain(COMMAND_T* cmd) {
+	const FX* fx = LAST_FOCUSED_FX::get_last_focused_fx();
 	if (fx->is_valid()) {
-		MediaTrack *track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
+		MediaTrack* track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
 		if (!fx->is_take_fx()) { // track fx
 			if (fx->is_chain_visible()) {
 				TrackFX_Show(track, fx->fx_id, 0);
@@ -31,7 +31,7 @@ void toggle_show_last_focused_fx_chain(COMMAND_T *cmd) {
 				TrackFX_Show(track, fx->fx_id, 1);
 			}
 		} else {
-			MediaItem_Take *take = GetMediaItemTake(GetTrackMediaItem(track, fx->item_id), fx->take_id);
+			MediaItem_Take* take = GetMediaItemTake(GetTrackMediaItem(track, fx->item_id), fx->take_id);
 			if (fx->is_chain_visible()) {
 				TakeFX_Show(take, fx->fx_id, 0);
 			} else {
@@ -41,16 +41,16 @@ void toggle_show_last_focused_fx_chain(COMMAND_T *cmd) {
 	}
 }
 
-void toggle_bypass_last_focused_fx(COMMAND_T *cmd) {
-	const FX *fx = LAST_FOCUSED_FX::get_last_focused_fx();
+void toggle_bypass_last_focused_fx(COMMAND_T* cmd) {
+	const FX* fx = LAST_FOCUSED_FX::get_last_focused_fx();
 	if (fx->is_valid()) {
-		MediaTrack *track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
+		MediaTrack* track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
 		if (!fx->is_take_fx()) { // track fx
 			if (!only_if_open or fx->is_visible()) {
 				TrackFX_SetEnabled(track, fx->fx_id, !TrackFX_GetEnabled(track, fx->fx_id));
 			}
 		} else {
-			MediaItem_Take *take = GetMediaItemTake(GetTrackMediaItem(track, fx->item_id), fx->take_id);
+			MediaItem_Take* take = GetMediaItemTake(GetTrackMediaItem(track, fx->item_id), fx->take_id);
 			if (!only_if_open or fx->is_visible()) {
 				TakeFX_SetEnabled(take, fx->fx_id, !TakeFX_GetEnabled(take, fx->fx_id));
 			}
@@ -58,7 +58,7 @@ void toggle_bypass_last_focused_fx(COMMAND_T *cmd) {
 	}
 }
 
-auto toggle_bypass_last_focused_fx_chain_undo_str = [](MediaTrack *track, MediaItem *item = nullptr) {
+auto toggle_bypass_last_focused_fx_chain_undo_str = [](MediaTrack* track, MediaItem* item = nullptr) {
 	if (!item) {
 		std::string undo_str = "Toggle bypass all FX: ";
 		undo_str += (track == GetMasterTrack(nullptr))
@@ -73,11 +73,11 @@ auto toggle_bypass_last_focused_fx_chain_undo_str = [](MediaTrack *track, MediaI
 	}
 };
 
-void toggle_bypass_last_focused_fx_chain(COMMAND_T *cmd) {
-	const FX *fx = LAST_FOCUSED_FX::get_last_focused_fx();
+void toggle_bypass_last_focused_fx_chain(COMMAND_T* cmd) {
+	const FX* fx = LAST_FOCUSED_FX::get_last_focused_fx();
 	bool state = true;
 	if (fx->is_valid()) {
-		MediaTrack *track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
+		MediaTrack* track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
 		if (!fx->is_take_fx()) { // track fx
 			if (!only_if_open or fx->is_chain_visible()) {
 				if (fx->is_rec_fx()) {
@@ -110,8 +110,8 @@ void toggle_bypass_last_focused_fx_chain(COMMAND_T *cmd) {
 				}
 			}
 		} else {
-			MediaItem *item = GetTrackMediaItem(track, fx->item_id);
-			MediaItem_Take *take = GetMediaItemTake(item, fx->take_id);
+			MediaItem* item = GetTrackMediaItem(track, fx->item_id);
+			MediaItem_Take* take = GetMediaItemTake(item, fx->take_id);
 			if (!only_if_open or fx->is_chain_visible()) {
 				Undo_BeginBlock2(nullptr);
 				for (int i = TakeFX_GetCount(take) - 1; i >= 0; i--) {
@@ -130,16 +130,16 @@ void toggle_bypass_last_focused_fx_chain(COMMAND_T *cmd) {
 	}
 }
 
-void toggle_offline_last_focused_fx(COMMAND_T *cmd) {
-	const FX *fx = LAST_FOCUSED_FX::get_last_focused_fx();
+void toggle_offline_last_focused_fx(COMMAND_T* cmd) {
+	const FX* fx = LAST_FOCUSED_FX::get_last_focused_fx();
 	if (fx->is_valid()) {
-		MediaTrack *track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
+		MediaTrack* track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
 		if (!fx->is_take_fx()) { // track fx
 			if (!only_if_open or fx->is_visible()) {
 				TrackFX_SetOffline(track, fx->fx_id, !TrackFX_GetOffline(track, fx->fx_id));
 			}
 		} else {
-			MediaItem_Take *take = GetMediaItemTake(GetTrackMediaItem(track, fx->item_id), fx->take_id);
+			MediaItem_Take* take = GetMediaItemTake(GetTrackMediaItem(track, fx->item_id), fx->take_id);
 			if (!only_if_open or fx->is_visible()) {
 				TakeFX_SetOffline(take, fx->fx_id, !TakeFX_GetOffline(take, fx->fx_id));
 			}
@@ -148,16 +148,16 @@ void toggle_offline_last_focused_fx(COMMAND_T *cmd) {
 }
 
 
-void delete_last_focused_fx(COMMAND_T *cmd) {
-	const FX *fx = LAST_FOCUSED_FX::get_last_focused_fx();
+void delete_last_focused_fx(COMMAND_T* cmd) {
+	const FX* fx = LAST_FOCUSED_FX::get_last_focused_fx();
 	if (fx->is_valid()) {
-		MediaTrack *track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
+		MediaTrack* track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
 		if (!fx->is_take_fx()) { // track fx
 			if (!only_if_open or fx->is_visible()) {
 				TrackFX_Delete(track, fx->fx_id);
 			}
 		} else {
-			MediaItem_Take *take = GetMediaItemTake(GetTrackMediaItem(track, fx->item_id), fx->take_id);
+			MediaItem_Take* take = GetMediaItemTake(GetTrackMediaItem(track, fx->item_id), fx->take_id);
 			if (!only_if_open or fx->is_visible()) {
 				TakeFX_Delete(take, fx->fx_id);
 			}
@@ -165,7 +165,7 @@ void delete_last_focused_fx(COMMAND_T *cmd) {
 	}
 }
 
-auto toggle_offline_last_focused_fx_chain_undo_str = [](MediaTrack *track, MediaItem *item = nullptr) {
+auto toggle_offline_last_focused_fx_chain_undo_str = [](MediaTrack* track, MediaItem* item = nullptr) {
 	if (!item) {
 		std::string undo_str = "Toggle offline FX: ";
 		undo_str += (track == GetMasterTrack(nullptr))
@@ -180,11 +180,11 @@ auto toggle_offline_last_focused_fx_chain_undo_str = [](MediaTrack *track, Media
 	}
 };
 
-void toggle_offline_last_focused_fx_chain(COMMAND_T *cmd) {
-	const FX *fx = LAST_FOCUSED_FX::get_last_focused_fx();
+void toggle_offline_last_focused_fx_chain(COMMAND_T* cmd) {
+	const FX* fx = LAST_FOCUSED_FX::get_last_focused_fx();
 	bool state = true;
 	if (fx->is_valid()) {
-		MediaTrack *track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
+		MediaTrack* track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
 		if (!fx->is_take_fx()) { // track fx
 			if (!only_if_open or fx->is_chain_visible()) {
 				if (fx->is_rec_fx()) {
@@ -217,8 +217,8 @@ void toggle_offline_last_focused_fx_chain(COMMAND_T *cmd) {
 				}
 			}
 		} else {
-			MediaItem *item = GetTrackMediaItem(track, fx->item_id);
-			MediaItem_Take *take = GetMediaItemTake(item, fx->take_id);
+			MediaItem* item = GetTrackMediaItem(track, fx->item_id);
+			MediaItem_Take* take = GetMediaItemTake(item, fx->take_id);
 			if (!only_if_open or fx->is_chain_visible()) {
 				Undo_BeginBlock2(nullptr);
 				for (int i = TakeFX_GetCount(take) - 1; i >= 0; i--) {
@@ -238,7 +238,7 @@ void toggle_offline_last_focused_fx_chain(COMMAND_T *cmd) {
 }
 
 
-auto delete_last_focused_fx_chain_undo_str = [](MediaTrack *track, MediaItem *item = nullptr) {
+auto delete_last_focused_fx_chain_undo_str = [](MediaTrack* track, MediaItem* item = nullptr) {
 	if (!item) {
 		std::string undo_str = "Remove all FX: ";
 		undo_str += (track == GetMasterTrack(nullptr))
@@ -254,10 +254,10 @@ auto delete_last_focused_fx_chain_undo_str = [](MediaTrack *track, MediaItem *it
 };
 
 
-void delete_last_focused_fx_chain(COMMAND_T *cmd) {
-	const FX *fx = LAST_FOCUSED_FX::get_last_focused_fx();
+void delete_last_focused_fx_chain(COMMAND_T* cmd) {
+	const FX* fx = LAST_FOCUSED_FX::get_last_focused_fx();
 	if (fx->is_valid()) {
-		MediaTrack *track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
+		MediaTrack* track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id);
 		if (!fx->is_take_fx()) { // track fx
 			if (!only_if_open or fx->is_chain_visible()) {
 				if (fx->is_rec_fx()) {
@@ -280,8 +280,8 @@ void delete_last_focused_fx_chain(COMMAND_T *cmd) {
 				}
 			}
 		} else {
-			MediaItem *item = GetTrackMediaItem(track, fx->item_id);
-			MediaItem_Take *take = GetMediaItemTake(item, fx->take_id);
+			MediaItem* item = GetTrackMediaItem(track, fx->item_id);
+			MediaItem_Take* take = GetMediaItemTake(item, fx->take_id);
 			if (!only_if_open or fx->is_chain_visible()) {
 				Undo_BeginBlock2(nullptr);
 				for (int i = TakeFX_GetCount(take) - 1; i >= 0; i--) {
@@ -294,7 +294,7 @@ void delete_last_focused_fx_chain(COMMAND_T *cmd) {
 	}
 }
 
-auto fx_ab_comparer_undo_str = [](MediaTrack *track, MediaItem *item = nullptr) {
+auto fx_ab_comparer_undo_str = [](MediaTrack* track, MediaItem* item = nullptr) {
 	if (!item) {
 		std::string undo_str = "Change FX preset: ";
 		undo_str += (track == GetMasterTrack(nullptr))
@@ -309,9 +309,9 @@ auto fx_ab_comparer_undo_str = [](MediaTrack *track, MediaItem *item = nullptr) 
 	}
 };
 
-void fx_ab_comparer(COMMAND_T *cmd) {
+void fx_ab_comparer(COMMAND_T* cmd) {
 	static std::unordered_map<std::string, std::string> presets;
-	const FX *fx = LAST_FOCUSED_FX::get_last_focused_fx();
+	const FX* fx = LAST_FOCUSED_FX::get_last_focused_fx();
 	if (!fx->is_valid()) {
 		#if defined(_DEBUG)
 		ShowConsoleMsg("Not focused plugin\n");
@@ -321,7 +321,7 @@ void fx_ab_comparer(COMMAND_T *cmd) {
 	// I don't know what to do with monitoring fx (the information about them is stored in the project file, not in a separate chunk)
 	if (fx->is_rec_fx() and fx->track_id == -1) return;
 
-	MediaTrack *track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id); // Master : regular
+	MediaTrack* track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id); // Master : regular
 	std::string guid, fx_chunk;
 
 	if (!fx->is_take_fx()) { // track fx
@@ -342,8 +342,8 @@ void fx_ab_comparer(COMMAND_T *cmd) {
 		}
 		Undo_EndBlock2(nullptr, undo_str.data(), 2);
 	} else { // item fx
-		MediaItem *item = GetTrackMediaItem(track, fx->item_id);
-		MediaItem_Take *take = GetMediaItemTake(item, fx->take_id);
+		MediaItem* item = GetTrackMediaItem(track, fx->item_id);
+		MediaItem_Take* take = GetMediaItemTake(item, fx->take_id);
 		if (only_if_open and !fx->is_visible()) return;
 		guid = guid_to_string(TakeFX_GetFXGUID(take, fx->fx_id));
 
@@ -365,7 +365,7 @@ void fx_ab_comparer(COMMAND_T *cmd) {
 }
 
 
-auto fx_chain_ab_comparer_undo_str = [](MediaTrack *track, MediaItem *item = nullptr) {
+auto fx_chain_ab_comparer_undo_str = [](MediaTrack* track, MediaItem* item = nullptr) {
 	if (!item) {
 		std::string undo_str = "Change FX chain preset: ";
 		undo_str += (track == GetMasterTrack(nullptr))
@@ -380,9 +380,9 @@ auto fx_chain_ab_comparer_undo_str = [](MediaTrack *track, MediaItem *item = nul
 	}
 };
 
-void fx_chain_ab_comparer(COMMAND_T *cmd) {
+void fx_chain_ab_comparer(COMMAND_T* cmd) {
 	static std::unordered_map<std::string, std::string> presets;
-	const FX *fx = LAST_FOCUSED_FX::get_last_focused_fx();
+	const FX* fx = LAST_FOCUSED_FX::get_last_focused_fx();
 	if (!fx->is_valid()) {
 		#if defined(_DEBUG)
 		ShowConsoleMsg("Not focused plugin\n");
@@ -396,7 +396,7 @@ void fx_chain_ab_comparer(COMMAND_T *cmd) {
 	// I don't know what to do with monitoring fx (the information about them is stored in the project file, not in a separate chunk)
 	if (fx->is_rec_fx() and fx->track_id == -1) return;
 
-	MediaTrack *track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id); // Master : regular
+	MediaTrack* track = (fx->track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, fx->track_id); // Master : regular
 	std::string guid, fx_chain_chunk;
 
 
@@ -423,8 +423,8 @@ void fx_chain_ab_comparer(COMMAND_T *cmd) {
 		}
 		Undo_EndBlock2(nullptr, undo_str.data(), 2);
 	} else { // item fx
-		MediaItem *item = GetTrackMediaItem(track, fx->item_id);
-		MediaItem_Take *take = GetMediaItemTake(item, fx->take_id);
+		MediaItem* item = GetTrackMediaItem(track, fx->item_id);
+		MediaItem_Take* take = GetMediaItemTake(item, fx->take_id);
 		if (only_if_open and !fx->is_chain_visible()) return;
 
 		guid.resize(64);
@@ -453,7 +453,7 @@ void fx_chain_ab_comparer(COMMAND_T *cmd) {
 FX::FX(int tr, int it, int tk, int fx, int pr = 0): track_id(tr), item_id(it), take_id(tk), fx_id(fx), guid(_get_fx_guid()), param(pr) {}
 
 bool FX::is_visible() const {
-	MediaTrack *track = (track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, track_id);
+	MediaTrack* track = (track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, track_id);
 	if (!track) return false;
 	if (!is_take_fx()) {
 		if (param == 2) {
@@ -461,9 +461,9 @@ bool FX::is_visible() const {
 		}
 		return TrackFX_GetOpen(track, fx_id);
 	} else {
-		MediaItem *item = GetTrackMediaItem(track, item_id);
+		MediaItem* item = GetTrackMediaItem(track, item_id);
 		if (!item) return false;
-		MediaItem_Take *take = GetMediaItemTake(item, take_id);
+		MediaItem_Take* take = GetMediaItemTake(item, take_id);
 		if (!take) return false;
 		return TakeFX_GetOpen(take, fx_id);
 	}
@@ -471,14 +471,14 @@ bool FX::is_visible() const {
 
 bool FX::is_valid() const {
 	if (param == 2) return true;
-	MediaTrack *track = (track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, track_id);
+	MediaTrack* track = (track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, track_id);
 	if (!track) return false;
 	if (!is_take_fx()) {
 		return (*TrackFX_GetFXGUID(track, fx_id) == *guid);
 	} else {
-		MediaItem *item = GetTrackMediaItem(track, item_id);
+		MediaItem* item = GetTrackMediaItem(track, item_id);
 		if (!item) return false;
-		MediaItem_Take *take = GetMediaItemTake(item, take_id);
+		MediaItem_Take* take = GetMediaItemTake(item, take_id);
 		if (!take) return false;
 		return (guid and *TakeFX_GetFXGUID(take, fx_id) == *guid);
 	}
@@ -486,14 +486,14 @@ bool FX::is_valid() const {
 
 
 bool FX::is_chain_visible() const {
-	MediaTrack *track = (track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, track_id);
+	MediaTrack* track = (track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, track_id);
 	if (!track) return false;
 	if (!is_take_fx()) {
 		return (is_rec_fx() and TrackFX_GetRecChainVisible(track) != -1) or (!is_rec_fx() and TrackFX_GetChainVisible(track) != -1);
 	} else {
-		MediaItem *item = GetTrackMediaItem(track, item_id);
+		MediaItem* item = GetTrackMediaItem(track, item_id);
 		if (!item) return false;
-		MediaItem_Take *take = GetMediaItemTake(item, take_id);
+		MediaItem_Take* take = GetMediaItemTake(item, take_id);
 		if (!take) return false;
 		return TakeFX_GetChainVisible(take) != -1;
 	}
@@ -532,16 +532,16 @@ bool FX::operator!=(const FX &o) const {
 	return !(track_id == o.track_id and item_id == o.item_id and take_id == o.take_id and fx_id == o.fx_id and fx_id == o.fx_id and param == o.param and *guid == *o.guid);
 }
 
-GUID *FX::_get_fx_guid() const {
-	MediaTrack *track = (track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, track_id); // Master : regular
+GUID* FX::_get_fx_guid() const {
+	MediaTrack* track = (track_id == -1) ? GetMasterTrack(nullptr) : GetTrack(nullptr, track_id); // Master : regular
 	if (!track) return nullptr;
 
 	if (item_id == -1) {
 		return TrackFX_GetFXGUID(track, fx_id);
 	} else {
-		MediaItem *item = GetTrackMediaItem(track, item_id);
+		MediaItem* item = GetTrackMediaItem(track, item_id);
 		if (!item) return nullptr;
-		MediaItem_Take *take = GetMediaItemTake(item, take_id);
+		MediaItem_Take* take = GetMediaItemTake(item, take_id);
 		if (!take) return nullptr;
 		return TakeFX_GetFXGUID(take, fx_id);
 	}
@@ -564,9 +564,9 @@ void LAST_FOCUSED_FX::last_focused_fx_observer() {
 	}
 }
 
-const LAST_FOCUSED_FX *LAST_FOCUSED_FX::get_last_focused_fx() {
+const LAST_FOCUSED_FX* LAST_FOCUSED_FX::get_last_focused_fx() {
 	return last_focused_fx;
 }
 
 LAST_FOCUSED_FX LAST_FOCUSED_FX::_lff{};
-LAST_FOCUSED_FX *LAST_FOCUSED_FX::last_focused_fx = &_lff;
+LAST_FOCUSED_FX* LAST_FOCUSED_FX::last_focused_fx = &_lff;

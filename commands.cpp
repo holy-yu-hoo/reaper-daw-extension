@@ -1,9 +1,10 @@
 #include "api.h"
 #include "commands.h"
-#include "actions/actions.h"
 #include "midi/midi.h"
 #include "item/item.h"
 #include "config.h"
+#include "misc/misc.h"
+#include "actions/fx.h"
 
 
 std::vector<COMMAND_T> commands = {
@@ -22,22 +23,76 @@ std::vector<COMMAND_T> commands = {
 	{ID_PREFIX "RESTORE_HORIZONTAL_ZOOM_MODE", NAME_PREFIX "Restore horizontal zoom mode", nullptr, restore_hor_zoom_mode, SECTION_MAIN,},
 	{ID_PREFIX "SAVE_VERTICAL_ZOOM_MODE", NAME_PREFIX "Save vertical zoom mode", nullptr, save_ver_zoom_mode, SECTION_MAIN,},
 	{ID_PREFIX "RESTORE_VERTICAL_ZOOM_MODE", NAME_PREFIX "Restore vertical zoom mode", nullptr, restore_ver_zoom_mode, SECTION_MAIN,},
-	{ID_PREFIX "FILL_EACH_2_STEPS_IN_ACTIVE_ME", NAME_PREFIX "fill each 2 steps", nullptr, fill_each_n_steps, SECTION_MIDI_EDITOR,nullptr,0,2},
-	{ID_PREFIX "FILL_EACH_4_STEPS_IN_ACTIVE_ME", NAME_PREFIX "fill each 4 steps", nullptr, fill_each_n_steps, SECTION_MIDI_EDITOR,nullptr,0,4},
-	{ID_PREFIX "FILL_EACH_8_STEPS_IN_ACTIVE_ME", NAME_PREFIX "fill each 8 steps", nullptr, fill_each_n_steps, SECTION_MIDI_EDITOR,nullptr,0,8},
-	{ID_PREFIX "FILL_EACH_16_STEPS_IN_ACTIVE_ME", NAME_PREFIX "fill each 16 steps", nullptr, fill_each_n_steps, SECTION_MIDI_EDITOR,nullptr,0,16},
-	{ID_PREFIX "FILL_EACH_2_STEPS_IN_SELECTED_ITEMS", NAME_PREFIX "fill each 2 steps in selected items", nullptr, fill_each_n_steps_in_selected_items, SECTION_MAIN,nullptr,0,2},
-	{ID_PREFIX "FILL_EACH_4_STEPS_IN_SELECTED_ITEMS", NAME_PREFIX "fill each 4 steps in selected items", nullptr, fill_each_n_steps_in_selected_items, SECTION_MAIN,nullptr,0,4},
-	{ID_PREFIX "FILL_EACH_8_STEPS_IN_SELECTED_ITEMS", NAME_PREFIX "fill each 8 steps in selected items", nullptr, fill_each_n_steps_in_selected_items, SECTION_MAIN,nullptr,0,8},
-	{ID_PREFIX "FILL_EACH_16_STEPS_IN_SELECTED_ITEMS", NAME_PREFIX "fill each 16 steps in selected items", nullptr, fill_each_n_steps_in_selected_items, SECTION_MAIN,nullptr,0,16},
-	{ID_PREFIX "FILL_EACH_2_STEPS_WITH_DEL_IN_ACTIVE_ME", NAME_PREFIX "fill each 2 steps (delete before)", nullptr, fill_each_n_steps_with_del, SECTION_MIDI_EDITOR,nullptr,0,2},
-	{ID_PREFIX "FILL_EACH_4_STEPS_WITH_DEL_IN_ACTIVE_ME", NAME_PREFIX "fill each 4 steps (delete before)", nullptr, fill_each_n_steps_with_del, SECTION_MIDI_EDITOR,nullptr,0,4},
-	{ID_PREFIX "FILL_EACH_8_STEPS_WITH_DEL_IN_ACTIVE_ME", NAME_PREFIX "fill each 8 steps (delete before)", nullptr, fill_each_n_steps_with_del, SECTION_MIDI_EDITOR,nullptr,0,8},
-	{ID_PREFIX "FILL_EACH_16_STEPS_WITH_DEL_IN_ACTIVE_ME", NAME_PREFIX "fill each 16 steps (delete before)", nullptr, fill_each_n_steps_with_del, SECTION_MIDI_EDITOR,nullptr,0,16},
-	{ID_PREFIX "FILL_EACH_2_STEPS_WITH_DEL_IN_SELECTED_ITEMS", NAME_PREFIX "fill each 2 steps in selected items (delete before)", nullptr, fill_each_n_steps_with_del_in_selected_items, SECTION_MAIN,nullptr,0,2},
-	{ID_PREFIX "FILL_EACH_4_STEPS_WITH_DEL_IN_SELECTED_ITEMS", NAME_PREFIX "fill each 4 steps in selected items (delete before)", nullptr, fill_each_n_steps_with_del_in_selected_items, SECTION_MAIN,nullptr,0,4},
-	{ID_PREFIX "FILL_EACH_8_STEPS_WITH_DEL_IN_SELECTED_ITEMS", NAME_PREFIX "fill each 8 steps in selected items (delete before)", nullptr, fill_each_n_steps_with_del_in_selected_items, SECTION_MAIN,nullptr,0,8},
-	{ID_PREFIX "FILL_EACH_16_STEPS_WITH_DEL_IN_SELECTED_ITEMS", NAME_PREFIX "fill each 16 steps in selected items (delete before)", nullptr, fill_each_n_steps_with_del_in_selected_items, SECTION_MAIN,nullptr,0,16},
+	{ID_PREFIX "FILL_EACH_2_STEPS_IN_ACTIVE_ME", NAME_PREFIX "fill each 2 steps", nullptr, fill_each_n_steps, SECTION_MIDI_EDITOR, nullptr, 0, 2},
+	{ID_PREFIX "FILL_EACH_4_STEPS_IN_ACTIVE_ME", NAME_PREFIX "fill each 4 steps", nullptr, fill_each_n_steps, SECTION_MIDI_EDITOR, nullptr, 0, 4},
+	{ID_PREFIX "FILL_EACH_8_STEPS_IN_ACTIVE_ME", NAME_PREFIX "fill each 8 steps", nullptr, fill_each_n_steps, SECTION_MIDI_EDITOR, nullptr, 0, 8},
+	{ID_PREFIX "FILL_EACH_16_STEPS_IN_ACTIVE_ME", NAME_PREFIX "fill each 16 steps", nullptr, fill_each_n_steps, SECTION_MIDI_EDITOR, nullptr, 0, 16},
+	{ID_PREFIX "FILL_EACH_2_STEPS_IN_SELECTED_ITEMS", NAME_PREFIX "fill each 2 steps in selected items", nullptr, fill_each_n_steps_in_selected_items, SECTION_MAIN, nullptr, 0, 2},
+	{ID_PREFIX "FILL_EACH_4_STEPS_IN_SELECTED_ITEMS", NAME_PREFIX "fill each 4 steps in selected items", nullptr, fill_each_n_steps_in_selected_items, SECTION_MAIN, nullptr, 0, 4},
+	{ID_PREFIX "FILL_EACH_8_STEPS_IN_SELECTED_ITEMS", NAME_PREFIX "fill each 8 steps in selected items", nullptr, fill_each_n_steps_in_selected_items, SECTION_MAIN, nullptr, 0, 8},
+	{
+		ID_PREFIX "FILL_EACH_16_STEPS_IN_SELECTED_ITEMS",
+		NAME_PREFIX "fill each 16 steps in selected items",
+		nullptr,
+		fill_each_n_steps_in_selected_items,
+		SECTION_MAIN,
+		nullptr,
+		0,
+		16
+	},
+	{ID_PREFIX "FILL_EACH_2_STEPS_WITH_DEL_IN_ACTIVE_ME", NAME_PREFIX "fill each 2 steps (delete before)", nullptr, fill_each_n_steps_with_del, SECTION_MIDI_EDITOR, nullptr, 0, 2},
+	{ID_PREFIX "FILL_EACH_4_STEPS_WITH_DEL_IN_ACTIVE_ME", NAME_PREFIX "fill each 4 steps (delete before)", nullptr, fill_each_n_steps_with_del, SECTION_MIDI_EDITOR, nullptr, 0, 4},
+	{ID_PREFIX "FILL_EACH_8_STEPS_WITH_DEL_IN_ACTIVE_ME", NAME_PREFIX "fill each 8 steps (delete before)", nullptr, fill_each_n_steps_with_del, SECTION_MIDI_EDITOR, nullptr, 0, 8},
+	{
+		ID_PREFIX "FILL_EACH_16_STEPS_WITH_DEL_IN_ACTIVE_ME",
+		NAME_PREFIX "fill each 16 steps (delete before)",
+		nullptr,
+		fill_each_n_steps_with_del,
+		SECTION_MIDI_EDITOR,
+		nullptr,
+		0,
+		16
+	},
+	{
+		ID_PREFIX "FILL_EACH_2_STEPS_WITH_DEL_IN_SELECTED_ITEMS",
+		NAME_PREFIX "fill each 2 steps in selected items (delete before)",
+		nullptr,
+		fill_each_n_steps_with_del_in_selected_items,
+		SECTION_MAIN,
+		nullptr,
+		0,
+		2
+	},
+	{
+		ID_PREFIX "FILL_EACH_4_STEPS_WITH_DEL_IN_SELECTED_ITEMS",
+		NAME_PREFIX "fill each 4 steps in selected items (delete before)",
+		nullptr,
+		fill_each_n_steps_with_del_in_selected_items,
+		SECTION_MAIN,
+		nullptr,
+		0,
+		4
+	},
+	{
+		ID_PREFIX "FILL_EACH_8_STEPS_WITH_DEL_IN_SELECTED_ITEMS",
+		NAME_PREFIX "fill each 8 steps in selected items (delete before)",
+		nullptr,
+		fill_each_n_steps_with_del_in_selected_items,
+		SECTION_MAIN,
+		nullptr,
+		0,
+		8
+	},
+	{
+		ID_PREFIX "FILL_EACH_16_STEPS_WITH_DEL_IN_SELECTED_ITEMS",
+		NAME_PREFIX "fill each 16 steps in selected items (delete before)",
+		nullptr,
+		fill_each_n_steps_with_del_in_selected_items,
+		SECTION_MAIN,
+		nullptr,
+		0,
+		16
+	},
 	{ID_PREFIX "SAVE_HORIZONTAL_ZOOM_MODE_ME", NAME_PREFIX "Save horizontal zoom mode", nullptr, save_hor_zoom_mode, SECTION_MIDI_EDITOR,},
 	{ID_PREFIX "RESTORE_HORIZONTAL_ZOOM_MODE_ME", NAME_PREFIX "Restore horizontal zoom mode", nullptr, restore_hor_zoom_mode, SECTION_MIDI_EDITOR,},
 	{ID_PREFIX "SAVE_VERTICAL_ZOOM_MODE_ME", NAME_PREFIX "Save vertical zoom mode", nullptr, save_ver_zoom_mode, SECTION_MIDI_EDITOR,},
@@ -47,8 +102,26 @@ std::vector<COMMAND_T> commands = {
 	{ID_PREFIX "NOTE_STUTTER_MOUSEWHEEL", NAME_PREFIX "Note stutter (Midi relative/mousewheel)", nullptr, nullptr, SECTION_MIDI_EDITOR, note_stutter_mousewheel,},
 	{ID_PREFIX "RIPPLE_PER_TRACK_DELETE_ITEMS", NAME_PREFIX "Ripple per track delete items", nullptr, delete_items_ripple_per_track, SECTION_MAIN,},
 	{ID_PREFIX "RIPPLE_ALL_TRACK_DELETE_ITEMS", NAME_PREFIX "Ripple all track delete items", nullptr, delete_items_ripple_all_track, SECTION_MAIN,},
-	{ID_PREFIX "SET_LOOP_POINTS_TO_ACTIVE_MIDI_TAKE", NAME_PREFIX "Set loop points to active midi take", nullptr, set_loop_time_range_to_active_take, SECTION_MIDI_EDITOR,nullptr,0,1},
-	{ID_PREFIX "SET_TIME_SELECTION_TO_ACTIVE_MIDI_TAKE", NAME_PREFIX "Set time selection to active midi take", nullptr, set_loop_time_range_to_active_take, SECTION_MIDI_EDITOR,nullptr,0,0},
+	{
+		ID_PREFIX "SET_LOOP_POINTS_TO_ACTIVE_MIDI_TAKE",
+		NAME_PREFIX "Set loop points to active midi take",
+		nullptr,
+		set_loop_time_range_to_active_take,
+		SECTION_MIDI_EDITOR,
+		nullptr,
+		0,
+		1
+	},
+	{
+		ID_PREFIX "SET_TIME_SELECTION_TO_ACTIVE_MIDI_TAKE",
+		NAME_PREFIX "Set time selection to active midi take",
+		nullptr,
+		set_loop_time_range_to_active_take,
+		SECTION_MIDI_EDITOR,
+		nullptr,
+		0,
+		0
+	},
 };
 
 bool commands_init() {

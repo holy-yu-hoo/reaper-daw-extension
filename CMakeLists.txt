@@ -7,35 +7,39 @@ set(REAPER_USER_PLUGINS "C:/Users/yuhoo/AppData/Roaming/REAPER/UserPlugins")
 add_library(reaex MODULE)
 
 target_include_directories(reaex
-  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/sdk
+	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/sdk
 )
 
 set(SOURCES
 	main.cpp
 	api.cpp
 	reaper.cpp
-	utils/misc.cpp
-	utils/fx.cpp
 	commands.cpp
-	actions/actions.cpp
 	actions/fx.cpp
-	actions/misc.cpp
 	midi/midi.cpp
 	midi/utils.cpp
 	item/item.cpp
+	misc/misc.cpp
+	misc/utils.cpp
+	fx/fx_context.cpp
+	fx/fx_target.cpp
+	fx/utils.cpp
 )
 
 set(HEADERS
 	api.h
 	commands.h
-	utils/fx.h
-	utils/misc.h
-	actions/actions.h
-	actions/misc.h
+	<<<<<<< HEAD
 	midi/midi.h
 	midi/utils.h
 	item/item.h
+	config.h
+	misc/misc.h
+	misc/utils.h
+	fx/fx_context.h
+	fx/fx_target.h
+	fx/utils.h
 )
 
 
