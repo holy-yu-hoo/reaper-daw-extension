@@ -4,50 +4,84 @@
 
 class IFXTarget {
 	public:
-	virtual bool is_visible() =0;
+	virtual bool is_visible() const =0;
 
-	virtual void toggle_show() =0;
+	virtual void toggle_show() const =0;
 
-	virtual void toggle_bypass() =0;
+	virtual void toggle_bypass() const =0;
 
-	virtual void toggle_offline() =0;
+	virtual void toggle_offline() const =0;
 
-	virtual void remove() =0;
+	virtual void remove() const =0;
 
-	virtual void reset() =0;
+	virtual void reset() const =0;
 
-	virtual std::string get_guid() =0;
+	virtual std::string get_guid() const =0;
 
-	virtual std::string get_chunk() =0;
+	virtual std::string get_chunk() const =0;
+
+	virtual void set_chunk(std::string chunk) const =0;
+
+	virtual bool operator==(const IFXTarget &other) const =0;
+
+	virtual bool operator!=(const IFXTarget &other) const =0;
+
+	virtual operator bool() const =0;
+
+	virtual bool operator!() const =0;
+
+	virtual std::string get_key() const =0;
+
+	virtual bool is_valid() const =0;
 
 	virtual ~IFXTarget() = default;
 
-	static std::unique_ptr<IFXTarget> get_target(int tr_idx, int it_idx, int tk_idx, int fx_idx, int param_idx); // param not used yet
+	// static std::unique_ptr<IFXTarget> get_target(int tr_idx, int it_idx, int tk_idx, int fx_idx, int param_idx); // param not used yet
 };
 
 
 class FX: public IFXTarget {
 	std::shared_ptr<IFXContext> m_ctx;
 	int m_fx_idx;
+	std::string m_guid;
+	friend class FXObserver;
 
 	public:
-	FX(int tr_idx, int it_idx, int tk_idx, int fx_idx, int param_idx);
+	FX();
 
-	virtual bool is_visible() override;
+	FX(int tr_idx, int it_idx, int tk_idx, int fx_idx);
 
-	virtual void toggle_show() override;
+	FX(std::shared_ptr<IFXContext> ctx, int fx_idx);
 
-	virtual void toggle_bypass() override;
+	virtual bool is_visible() const override;
 
-	virtual void toggle_offline() override;
+	virtual void toggle_show() const override;
 
-	virtual void remove() override;
+	virtual void toggle_bypass() const override;
 
-	virtual void reset() override;
+	virtual void toggle_offline() const override;
 
-	virtual std::string get_guid() override;
+	virtual void remove() const override;
 
-	virtual std::string get_chunk() override;
+	virtual void reset() const override;
+
+	virtual std::string get_guid() const override;
+
+	virtual std::string get_chunk() const override;
+
+	virtual void set_chunk(std::string chunk) const override;
+
+	virtual bool operator==(const IFXTarget &other) const override;
+
+	virtual bool operator!=(const IFXTarget &other) const override;
+
+	virtual bool operator!() const override;
+
+	virtual operator bool() const override;
+
+	virtual std::string get_key() const override;
+
+	virtual bool is_valid() const override;
 
 	virtual ~FX() override = default;
 };
@@ -55,27 +89,49 @@ class FX: public IFXTarget {
 
 class FXChain: public IFXTarget {
 	std::shared_ptr<IFXContext> m_ctx;
-	int m_fx_idx;
+
+	friend class FXObserver;
 
 	public:
+	FXChain();
+
 	FXChain(int tr_idx, int it_idx, int tk_idx, int fx_idx);
 
-	virtual bool is_visible() override;
+	FXChain(std::shared_ptr<IFXContext> ctx);
 
-	virtual void toggle_show() override;
+	virtual bool is_visible() const override;
 
-	virtual void toggle_bypass() override;
+	virtual void toggle_show() const override;
 
-	virtual void toggle_offline() override;
+	virtual void toggle_bypass() const override;
 
-	virtual void remove() override;
+	virtual void toggle_offline() const override;
 
-	virtual void reset() override;
+	virtual void remove() const override;
 
-	virtual std::string get_guid() override;
+	virtual void reset() const override;
 
-	virtual std::string get_chunk() override;
+	virtual std::string get_guid() const override;
+
+	virtual std::string get_chunk() const override;
+
+	virtual void set_chunk(std::string chunk) const override;
+
+	virtual bool operator==(const IFXTarget &) const override;
+
+	virtual bool operator!=(const IFXTarget &) const override;
+
+	virtual bool operator!() const override;
+
+	virtual operator bool() const override;
+
+	virtual std::string get_key() const override;
+
+	virtual bool is_valid() const override;
 
 	virtual ~FXChain() override = default;
 
+	virtual int get_count();
+
+	virtual int get_fx_by_guid(std::string p_guid);
 };

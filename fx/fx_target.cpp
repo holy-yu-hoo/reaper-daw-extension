@@ -1,59 +1,94 @@
 #include  "api.h"
 #include "fx_target.h"
-
 #include "utils.h"
-
+#include "misc/utils.h"
 constexpr bool only_if_visible = true;
-
 #define proj nullptr
 using std::operator ""s;
 using std::string;
 
 //<------------------------------FX TARGET------------------------------<//
+FX::FX(): m_fx_idx(-1) {}
 
-FX::FX(int tr_idx, int it_idx, int tk_idx, int fx_idx, int param_idx) {
-	m_ctx = IFXContext::get_context(tr_idx, it_idx, tk_idx);
+FX::FX(int tr_idx, int it_idx, int tk_idx, int fx_idx) {
+	m_ctx = IFXContext::get_context(tr_idx, it_idx, tk_idx,IS_REC_FX(fx_idx));
 	m_fx_idx = MAKE_FX_NOT_REC(fx_idx);
+	m_guid = m_ctx->get_fx_guid(m_fx_idx);
+
 }
 
-inline bool FX::is_visible() {
-	return m_ctx->get_fx_open(m_fx_idx);
+FX::FX(std::shared_ptr<IFXContext> ctx, int fx_idx): m_ctx(m_ctx), m_fx_idx(fx_idx) {}
+
+inline bool FX::is_visible() const {
+	return not only_if_visible or m_ctx->get_fx_open(m_fx_idx);
 }
 
-inline void FX::toggle_show() {
+inline void FX::toggle_show() const {
 	m_ctx->set_fx_open(m_fx_idx, !m_ctx->get_fx_open(m_fx_idx));
 }
 
-inline void FX::toggle_bypass() {
+inline void FX::toggle_bypass() const {
 	if (not only_if_visible or m_ctx->get_fx_open(m_fx_idx)) {
 		m_ctx->set_fx_enabled(m_fx_idx, !m_ctx->get_fx_enabled(m_fx_idx));
 	}
 }
 
-inline void FX::toggle_offline() {
+inline void FX::toggle_offline() const {
 	if (not only_if_visible or m_ctx->get_fx_open(m_fx_idx)) {
 		m_ctx->set_fx_offline(m_fx_idx, !m_ctx->get_fx_offline(m_fx_idx));
 	}
 }
 
-inline void FX::remove() {
+inline void FX::remove() const {
 	if (not only_if_visible or m_ctx->get_fx_open(m_fx_idx)) {
 		m_ctx->delete_fx(m_fx_idx);
 	}
 }
 
-inline void FX::reset() {
+inline void FX::reset() const {
 	if (not only_if_visible or m_ctx->get_fx_open(m_fx_idx)) {
 		m_ctx->reset_preset(m_fx_idx);
 	}
 }
 
-inline string FX::get_guid() {
+inline string FX::get_guid() const {
 	return m_ctx->get_fx_guid(m_fx_idx);
 }
 
-inline string FX::get_chunk() {
+inline string FX::get_chunk() const {
 	return m_ctx->get_fx_chunk(m_fx_idx);
+}
+
+void FX::set_chunk(std::string chunk) const {
+	m_ctx->set_fx_chunk(m_fx_idx, chunk);
+}
+
+bool FX::operator==(const IFXTarget &other) const {
+	const FX* p_other = dynamic_cast<const FX*>(&other);
+	if (!p_other) return false;
+	return (m_ctx == p_other->m_ctx) and (m_fx_idx == p_other->m_fx_idx);
+}
+
+bool FX::operator!=(const IFXTarget &other) const {
+	const FX* p_other = dynamic_cast<const FX*>(&other);
+	if (!p_other) return true;
+	return (m_ctx != p_other->m_ctx) or (m_fx_idx != p_other->m_fx_idx);
+}
+
+bool FX::operator!() const {
+	return !(m_ctx and (m_fx_idx >= 0));
+}
+
+FX::operator bool() const {
+	return m_ctx and (m_fx_idx >= 0);
+}
+
+std::string FX::get_key() const {
+	return m_ctx->get_fx_guid(m_fx_idx);
+}
+
+bool FX::is_valid() const {
+	return (m_ctx and m_ctx->is_valid() and m_ctx->get_fx_guid(m_fx_idx) == m_guid);
 }
 
 //>------------------------------FX TARGET------------------------------>//
@@ -61,97 +96,143 @@ inline string FX::get_chunk() {
 
 //<------------------------------FXCHAIN TARGET------------------------------<//
 
+FXChain::FXChain() {}
+
 FXChain::FXChain(int tr_idx, int it_idx, int tk_idx, int fx_idx) {
-	m_ctx = IFXContext::get_context(tr_idx, it_idx, tk_idx);
-	m_fx_idx = fx_idx;
+	m_ctx = IFXContext::get_context(tr_idx, it_idx, tk_idx,IS_REC_FX(fx_idx));
 }
 
-inline bool FXChain::is_visible() {
+FXChain::FXChain(std::shared_ptr<IFXContext> ctx): m_ctx(ctx) {}
+
+inline bool FXChain::is_visible() const {
 	return m_ctx->get_fx_chain_open();
 }
 
-inline void FXChain::toggle_show() {
-	m_ctx->set_fx_chain_open(m_ctx->get_fx_chain_open());
+inline void FXChain::toggle_show() const {
+	m_ctx->set_fx_chain_open(!m_ctx->get_fx_chain_open());
 }
 
-void FXChain::toggle_bypass() {
-	if (not only_if_visible or m_ctx->get_fx_chain_open()) {
-		bool enable = true;
+void FXChain::toggle_bypass() const {
+	if (only_if_visible and !m_ctx->get_fx_chain_open()) return;
+	bool enable = true;
 
-		m_ctx->_undo_begin_block(nullptr);
+	m_ctx->_undo_begin_block(nullptr);
 
-		for (int i = 0; i < m_ctx->get_count(); i++) {
-			if (!m_ctx->get_fx_enabled(i)) {
-				enable = false;
-				break;
-			}
+	for (int i = 0; i < m_ctx->get_count(); i++) {
+		if (!m_ctx->get_fx_enabled(i)) {
+			enable = false;
+			break;
 		}
-
-		enable = !enable;
-		for (int i = 0; i < m_ctx->get_count(); i++) {
-			m_ctx->set_fx_enabled(i, enable);
-		}
-
-		string undo_str = "FX chain bypass toggle: "s + m_ctx->get_undo_str();
-		m_ctx->_undo_end_block(proj, undo_str.data());
 	}
-}
 
-void FXChain::toggle_offline() {
-	if (not only_if_visible or m_ctx->get_fx_chain_open()) {
-		bool offline = true;
-
-		m_ctx->_undo_begin_block(nullptr);
-
-		for (int i = 0; i < m_ctx->get_count(); i++) {
-			if (!m_ctx->get_fx_offline(i)) {
-				offline = false;
-				break;
-			}
-		}
-
-		offline = !offline;
-		for (int i = 0; i < m_ctx->get_count(); i++) {
-			m_ctx->set_fx_offline(i, offline);
-		}
-		string undo_str = "FX chain offline toggle: "s + m_ctx->get_undo_str();
-		m_ctx->_undo_end_block(proj, undo_str.data());
+	enable = !enable;
+	for (int i = 0; i < m_ctx->get_count(); i++) {
+		m_ctx->set_fx_enabled(i, enable);
 	}
+
+	string undo_str = "FX chain bypass toggle: "s + m_ctx->get_undo_str();
+	m_ctx->_undo_end_block(proj, undo_str.data());
+
 }
 
-void FXChain::remove() {
-	if (not only_if_visible or m_ctx->get_fx_chain_open()) {
-		m_ctx->_undo_begin_block(nullptr);
+void FXChain::toggle_offline() const {
+	if (only_if_visible and !m_ctx->get_fx_chain_open()) return;
+	bool offline = true;
 
-		for (int i = m_ctx->get_count() - 1; i >= 0; i--) {
-			m_ctx->delete_fx(i);
+	m_ctx->_undo_begin_block(nullptr);
+
+	for (int i = 0; i < m_ctx->get_count(); i++) {
+		if (!m_ctx->get_fx_offline(i)) {
+			offline = false;
+			break;
 		}
-
-		string undo_str = "FX chain delete: "s + m_ctx->get_undo_str();
-		m_ctx->_undo_end_block(proj, undo_str.data());
 	}
+
+	offline = !offline;
+	for (int i = 0; i < m_ctx->get_count(); i++) {
+		m_ctx->set_fx_offline(i, offline);
+	}
+	string undo_str = "FX chain offline toggle: "s + m_ctx->get_undo_str();
+	m_ctx->_undo_end_block(proj, undo_str.data());
+
 }
 
-void FXChain::reset() { // default fx chain preset is empty chain
-	if (not only_if_visible or m_ctx->get_fx_chain_open()) {
-		m_ctx->_undo_begin_block(nullptr);
+void FXChain::remove() const {
+	if (only_if_visible and !m_ctx->get_fx_chain_open()) return;
+	m_ctx->_undo_begin_block(nullptr);
 
-		for (int i = m_ctx->get_count() - 1; i >= 0; i--) {
-			m_ctx->delete_fx(i);
-		}
-
-		string undo_str = "Reset FX chain preset: "s + m_ctx->get_undo_str();
-		m_ctx->_undo_end_block(proj, undo_str.data());
+	for (int i = m_ctx->get_count() - 1; i >= 0; i--) {
+		m_ctx->delete_fx(i);
 	}
+
+	string undo_str = "FX chain delete: "s + m_ctx->get_undo_str();
+	m_ctx->_undo_end_block(proj, undo_str.data());
 }
 
-inline string FXChain::get_guid() {
+void FXChain::reset() const { // default fx chain preset is empty chain
+	if (only_if_visible and !m_ctx->get_fx_chain_open()) return;
+	m_ctx->_undo_begin_block(nullptr);
+
+	for (int i = m_ctx->get_count() - 1; i >= 0; i--) {
+		m_ctx->delete_fx(i);
+	}
+
+	string undo_str = "Reset FX chain preset: "s + m_ctx->get_undo_str();
+	m_ctx->_undo_end_block(proj, undo_str.data());
+
+}
+
+inline string FXChain::get_guid() const {
 	return m_ctx->get_guid();
 }
 
-inline std::string FXChain::get_chunk() {
+inline std::string FXChain::get_chunk() const {
 	return m_ctx->get_fx_chain_chunk();
 }
 
+void FXChain::set_chunk(std::string chunk) const {
+	m_ctx->set_fx_chain_chunk(chunk);
+}
+
+bool FXChain::operator==(const IFXTarget &other) const {
+	const FXChain* p_other = dynamic_cast<const FXChain*>(&other);
+	if (!p_other) return false;
+	return (m_ctx == p_other->m_ctx);
+}
+
+bool FXChain::operator!=(const IFXTarget &other) const {
+	const FXChain* p_other = dynamic_cast<const FXChain*>(&other);
+	if (!p_other) return true;
+	return (m_ctx != p_other->m_ctx);
+}
+
+bool FXChain::operator!() const {
+	return !(static_cast<bool>(m_ctx));
+}
+
+FXChain::operator bool() const {
+	return static_cast<bool>(m_ctx);
+}
+
+string FXChain::get_key() const {
+	return m_ctx->get_key();
+}
+
+bool FXChain::is_valid() const {
+	return m_ctx and m_ctx->is_valid();
+}
+
+int FXChain::get_count() {
+	return m_ctx->get_count();
+}
+
+int FXChain::get_fx_by_guid(string guid) {
+	for (int f = 0; f < m_ctx->get_count(); f++) {
+		if (guid == m_ctx->get_fx_guid(f)) {
+			return f;
+		}
+	}
+	return -1;
+}
 
 //<------------------------------FXCHAIN TARGET------------------------------<//

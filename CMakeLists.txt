@@ -16,7 +16,6 @@ set(SOURCES
 	api.cpp
 	reaper.cpp
 	commands.cpp
-	actions/fx.cpp
 	midi/midi.cpp
 	midi/utils.cpp
 	item/item.cpp
@@ -25,6 +24,8 @@ set(SOURCES
 	fx/fx_context.cpp
 	fx/fx_target.cpp
 	fx/utils.cpp
+	fx/fx.cpp
+	fx/fx_observer.cpp
 )
 
 set(HEADERS
@@ -39,7 +40,9 @@ set(HEADERS
 	misc/utils.h
 	fx/fx_context.h
 	fx/fx_target.h
+	fx/fx_observer.h
 	fx/utils.h
+	fx/fx.h
 )
 
 

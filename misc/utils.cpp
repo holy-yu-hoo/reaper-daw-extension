@@ -33,8 +33,8 @@ std::string guid_to_string(const GUID* guid) {
 	return ret;
 }
 
-void string_to_guid(const std::string &s_guid, GUID* guid) {
-	stringToGuid(s_guid.data(), guid);
+void string_to_guid(const std::string &p_guid, GUID* guid) {
+	stringToGuid(p_guid.data(), guid);
 }
 
 bool has_single_selected_track(MediaTrack*&out_track) {
@@ -78,6 +78,7 @@ std::string get_set_media_track_info_string(MediaTrack* tr, const char* parmname
 }
 
 
+<<<<<<< HEAD
 bool is_grid_triplet() { // ╤Б╨┐╨╕╤Б╨░╨╜╨╛ ╨╕╨╖ SWS
 	int size = 0;
 	int offset = projectconfig_var_getoffs("projgriddiv", &size);
@@ -146,3 +147,22 @@ int get_grid_type() {
 	}
 
 }
+=======
+MediaItem_Take* get_media_item_take_by_guid(ReaProject* proj, std::string p_guid) {
+	if (p_guid.empty()) return nullptr;
+	GUID guid;
+	string_to_guid(p_guid, &guid);
+	MediaItem* item;
+	MediaItem_Take* take;
+	for (int i = 0; i < CountMediaItems(proj); i++) {
+		item = GetMediaItem(proj, i);
+		for (int j = 0; j < CountTakes(item); j++) {
+			take = GetTake(item, j);
+			if (guid == *static_cast<GUID *>(GetSetMediaItemTakeInfo(take, "GUID", nullptr))) {
+				return take;
+			}
+		}
+	}
+	return nullptr;
+}
+>>>>>>> bad5e57 (change observer and some things (require review))

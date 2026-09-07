@@ -21,7 +21,11 @@ REAPER_EXTRA_API_DECL void (*BR_GetMouseCursorContext)(char* windowOut, int wind
 
 REAPER_EXTRA_API_DECL void (*BR_GetMediaTrackGUID)(MediaTrack* track, char* guidStringOut, int guidStringOut_sz);
 
+REAPER_EXTRA_API_DECL MediaTrack* (*BR_GetMediaTrackByGUID)(ReaProject* proj, const char* guidStringIn);
+
 REAPER_EXTRA_API_DECL void (*BR_GetMediaItemGUID)(MediaItem* item, char* guidStringOut, int guidStringOut_sz);
+
+REAPER_EXTRA_API_DECL MediaItem* (*BR_GetMediaItemByGUID)(ReaProject* proj, const char* guidStringIn);
 
 REAPER_EXTRA_API_DECL void (*BR_GetMediaItemTakeGUID)(MediaItem_Take* take, char* guidStringOut, int guidStringOut_sz);
 
