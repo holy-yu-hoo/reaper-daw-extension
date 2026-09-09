@@ -22,11 +22,19 @@ bool register_commands(std::vector<COMMAND_T> &commands) {
 bool unregister_commands(std::vector<COMMAND_T> &commands) {
 	static custom_action_register_t car{0};
 	for (auto &command: commands) {
+		const int registered_cmd_id = command.cmd_id;
 		car.idStr = command.id;
 		car.name = command.name;
 		car.uniqueSectionId = command.unique_section_id;
-		command.cmd_id = plugin_register("-custom_action", static_cast<void*>(&car));
-		if (!command.cmd_id) return false;
+		const int ok = plugin_register("-custom_action", static_cast<void*>(&car));
+		if (!ok) return false;
+		g_commands.erase(
+			std::remove_if(g_commands.begin(), g_commands.end(), [cmd_id = registered_cmd_id](const COMMAND_T &registered) {
+				return registered.cmd_id == cmd_id;
+			}),
+			g_commands.end()
+		);
+		command.cmd_id = 0;
 	}
 	return true;
 }
@@ -89,7 +97,7 @@ static void import_extension_api() {
 }
 
 static bool implement_api() {
-	if (REAPERAPI_LoadAPI(g_rec->GetFunc) > 0) return false;
+	if (REAPERAPI_LoadAPI(g_rec->GetFunc) != 0) return false;
 	return true;
 }
 

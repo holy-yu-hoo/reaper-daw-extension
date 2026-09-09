@@ -1,6 +1,7 @@
 #include "api.h"
+#include "utils.h"
 
-bool get_state_chunk(MediaTrack* track, std::string& chunk) {
+bool get_state_chunk(MediaTrack* track, std::string &chunk) {
 	chunk.clear();
 	chunk.resize(4096);
 	bool ret = GetTrackStateChunk(track, &chunk.front(), static_cast<int>(chunk.size()), false);
@@ -12,7 +13,7 @@ bool get_state_chunk(MediaTrack* track, std::string& chunk) {
 	return ret;
 }
 
-bool get_state_chunk(MediaItem* item, std::string& chunk) {
+bool get_state_chunk(MediaItem* item, std::string &chunk) {
 	chunk.clear();
 	chunk.resize(4096);
 	bool ret = GetItemStateChunk(item, &chunk.front(), static_cast<int>(chunk.size()), false);
@@ -77,14 +78,12 @@ std::string get_set_media_track_info_string(MediaTrack* tr, const char* parmname
 	return str;
 }
 
-
-<<<<<<< HEAD
-bool is_grid_triplet() { // ╤Б╨┐╨╕╤Б╨░╨╜╨╛ ╨╕╨╖ SWS
+bool is_grid_triplet() { // from SWS
 	int size = 0;
 	int offset = projectconfig_var_getoffs("projgriddiv", &size);
 	void* addr = projectconfig_var_addr(nullptr, offset);
 	double grid = *static_cast<double*>(addr);
-	if (grid < 1e8) return 0;
+	if (grid < 1e8) return false;
 	double n = 1.0 / grid;
 
 	while (n < 3.0) { n *= 2.0; }
@@ -94,12 +93,12 @@ bool is_grid_triplet() { // ╤Б╨┐╨╕╤Б╨░╨╜╨╛ ╨╕╨�
 
 }
 
-bool is_grid_dotted() { // ╤Б╨┐╨╕╤Б╨░╨╜╨╛ ╨╕╨╖ SWS
+bool is_grid_dotted() { // from SWS
 	int size = 0;
 	int offset = projectconfig_var_getoffs("projgriddiv", &size);
 	void* addr = projectconfig_var_addr(nullptr, offset);
 	double grid = *static_cast<double*>(addr);
-	if (grid < 1e8) return 0;
+	if (grid < 1e8) return false;
 	double n = 1.0 / grid;
 
 	while (n < (2.0 / 3.0)) { n *= 2.0; }
@@ -110,12 +109,12 @@ bool is_grid_dotted() { // ╤Б╨┐╨╕╤Б╨░╨╜╨╛ ╨╕╨╖
 
 }
 
-bool is_grid_swing() { // ╤Б╨┐╨╕╤Б╨░╨╜╨╛ ╨╕╨╖ SWS
+bool is_grid_swing() { // from SWS
 	int size = 0;
 	int offset = projectconfig_var_getoffs("projgridframe", &size);
 	void* addr = projectconfig_var_addr(nullptr, offset);
 	int frame = *static_cast<int*>(addr);
-	return (frame & 8 == 1);
+	return ((frame & 8) == 1);
 
 }
 
@@ -132,23 +131,20 @@ int get_grid_type() {
 	if (is_grid_triplet()) {
 		return 2;
 
-	}
-	else if (is_grid_dotted()) {
+	} else if (is_grid_dotted()) {
 		return 4;
 
-	}
-	else if (is_grid_swing()) {
+	} else if (is_grid_swing()) {
 		return 8;
 
-	}
-	else {
+	} else {
 		return 0;
 
 	}
 
 }
-=======
-MediaItem_Take* get_media_item_take_by_guid(ReaProject* proj, std::string p_guid) {
+
+MediaItem_Take* get_media_item_take_by_guid(ReaProject* proj, std::string &p_guid) {
 	if (p_guid.empty()) return nullptr;
 	GUID guid;
 	string_to_guid(p_guid, &guid);
@@ -158,11 +154,10 @@ MediaItem_Take* get_media_item_take_by_guid(ReaProject* proj, std::string p_guid
 		item = GetMediaItem(proj, i);
 		for (int j = 0; j < CountTakes(item); j++) {
 			take = GetTake(item, j);
-			if (guid == *static_cast<GUID *>(GetSetMediaItemTakeInfo(take, "GUID", nullptr))) {
+			if (guid == *static_cast<GUID*>(GetSetMediaItemTakeInfo(take, "GUID", nullptr))) {
 				return take;
 			}
 		}
 	}
 	return nullptr;
 }
->>>>>>> bad5e57 (change observer and some things (require review))

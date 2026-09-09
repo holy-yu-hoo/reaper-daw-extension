@@ -44,13 +44,21 @@ class IFXContext {
 
 	virtual std::string get_config_param(int fx_idx, const std::string &param_name) =0;
 
+	virtual bool set_config_param(int fx_idx, const std::string &param_name, const std::string &param_value) =0;
+
 	virtual std::string get_full_name(int fx_idx) =0; // name kind: "type: name (vendor)"
 
 	virtual std::string get_name(int fx_idx) =0; // name kind: "name" (without "type: " and " (vendor)")
 
+	virtual bool set_full_name(int fx_idx, std::string name) =0;
+
+	virtual bool set_name(int fx_idx, std::string name) =0;
+
 	virtual ~IFXContext() = default;
 
 	static std::shared_ptr<IFXContext> get_context(int tr_idx, int it_idx, int tk_idx, int param = 0); // return track or take context
+	static std::shared_ptr<IFXContext> get_context(MediaTrack* track, int param = 0); // return track or take context
+	static std::shared_ptr<IFXContext> get_context(MediaItem_Take* take); // return track or take context
 
 	virtual void _undo_begin_block(ReaProject* project) =0;
 
@@ -67,6 +75,8 @@ class IFXContext {
 	virtual std::string get_key() =0;
 
 	virtual bool is_valid() =0;
+
+	virtual int add_fx_by_name(std::string name) =0;
 
 	protected:
 	virtual bool _fx_idx_valid(int fx_idx) =0;
@@ -127,9 +137,15 @@ class TrackFXContext: public IFXContext {
 
 	virtual std::string get_config_param(int fx_idx, const std::string &param_name) override;
 
+	virtual bool set_config_param(int fx_idx, const std::string &param_name, const std::string &param_value) override;
+
 	virtual std::string get_full_name(int fx_idx) override;
 
 	virtual std::string get_name(int fx_idx) override;
+
+	virtual bool set_full_name(int fx_idx, std::string name) override;
+
+	virtual bool set_name(int fx_idx, std::string name) override;
 
 	virtual ~TrackFXContext() override = default;
 
@@ -148,6 +164,8 @@ class TrackFXContext: public IFXContext {
 	virtual std::string get_key() override;
 
 	virtual bool is_valid() override;
+
+	virtual int add_fx_by_name(std::string name) override;
 
 	protected:
 	virtual bool _fx_idx_valid(int fx_idx) override;
@@ -207,9 +225,15 @@ class TakeFXContext: public IFXContext {
 
 	virtual std::string get_config_param(int fx_idx, const std::string &param_name) override;
 
+	virtual bool set_config_param(int fx_idx, const std::string &param_name, const std::string &param_value) override;
+
 	virtual std::string get_full_name(int fx_idx) override;
 
 	virtual std::string get_name(int fx_idx) override;
+
+	virtual bool set_full_name(int fx_idx, std::string name) override;
+
+	virtual bool set_name(int fx_idx, std::string name) override;
 
 	virtual ~TakeFXContext() override = default;
 
@@ -228,6 +252,8 @@ class TakeFXContext: public IFXContext {
 	virtual std::string get_key() override;
 
 	virtual bool is_valid() override;
+
+	virtual int add_fx_by_name(std::string name) override;
 
 	protected:
 	virtual bool _fx_idx_valid(int fx_idx) override;

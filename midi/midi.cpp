@@ -1,7 +1,7 @@
 #include "api.h"
 #include "midi.h"
 #include "utils.h"
-#include "utils/misc.h"
+#include "misc/utils.h"
 
 using std::operator""s;
 using std::vector;
@@ -14,26 +14,29 @@ void fill_each_n_steps(MediaItem_Take* take, float step, double len, bool sel = 
 	double pos = MIDI_GetPPQPosFromProjTime(take, take_start);
 	double step_len;
 	switch (midi_get_grid_type(take)) {
-	case 2: {
-		len *= 2.0 / 3.0;
-		step_len = len * step;
-		break;
+		case 2: {
+			len *= 2.0 / 3.0;
+			step_len = len * step;
+			break;
 
-	} case 4: {
-		len *= 1.5;
-		step_len = len * step;
-		break;
+		}
+		case 4: {
+			len *= 1.5;
+			step_len = len * step;
+			break;
 
-	} case 8: {
-		double swing = midi_get_grid_swing(take);
-		step_len = len * step;
-		len *= (1 + (swing / 2));
-		break;
+		}
+		case 8: {
+			double swing = midi_get_grid_swing(take);
+			step_len = len * step;
+			len *= (1 + (swing / 2));
+			break;
 
-	} case 0: {
-		step_len = len * step;
+		}
+		case 0: {
+			step_len = len * step;
 
-	}
+		}
 
 	}
 	MIDI_DisableSort(take);
@@ -53,26 +56,29 @@ void fill_each_n_steps_in_take(MediaItem_Take* take, float step, double len, boo
 	double pos = MIDI_GetPPQPosFromProjTime(take, take_start);
 	double step_len;
 	switch (get_grid_type()) {
-	case 2: {
-		len *= 2.0 / 3.0;
-		step_len = len * step;
-		break;
+		case 2: {
+			len *= 2.0 / 3.0;
+			step_len = len * step;
+			break;
 
-	} case 4: {
-		len *= 1.5;
-		step_len = len * step;
-		break;
+		}
+		case 4: {
+			len *= 1.5;
+			step_len = len * step;
+			break;
 
-	} case 8: {
-		double swing = get_grid_swing();
-		step_len = len * step;
-		len *= (1 + (swing / 2));
-		break;
+		}
+		case 8: {
+			double swing = get_grid_swing();
+			step_len = len * step;
+			len *= (1 + (swing / 2));
+			break;
 
-	} case 0: {
-		step_len = len * step;
+		}
+		case 0: {
+			step_len = len * step;
 
-	}
+		}
 
 	}
 	MIDI_DisableSort(take);
@@ -97,7 +103,7 @@ void fill_each_n_steps(COMMAND_T* cmd) {
 void fill_each_n_steps_in_selected_items(COMMAND_T* cmd) {
 	double note_len = 480; // 1/8
 	Undo_BeginBlock2(nullptr);
-	for (int i = 0;i < CountSelectedMediaItems(nullptr);i++) {
+	for (int i = 0; i < CountSelectedMediaItems(nullptr); i++) {
 		MediaItem_Take* take = GetActiveTake(GetSelectedMediaItem(nullptr, i));
 		fill_each_n_steps_in_take(take, cmd->user, note_len);
 
@@ -109,7 +115,7 @@ void fill_each_n_steps_in_selected_items(COMMAND_T* cmd) {
 
 
 void fill_each_n_steps_with_del(COMMAND_T* cmd) {
-	double note_len = 480; // 1/8 
+	double note_len = 480; // 1/8
 	MediaItem_Take* take = MIDIEditor_GetTake(MIDIEditor_GetActive());
 	Undo_BeginBlock2(nullptr);
 	delete_midi_notes(take);
@@ -123,7 +129,7 @@ void fill_each_n_steps_with_del(COMMAND_T* cmd) {
 void fill_each_n_steps_with_del_in_selected_items(COMMAND_T* cmd) {
 	double note_len = 480; // 1/8
 	Undo_BeginBlock2(nullptr);
-	for (int i = 0;i < CountSelectedMediaItems(nullptr);i++) {
+	for (int i = 0; i < CountSelectedMediaItems(nullptr); i++) {
 		MediaItem_Take* take = GetActiveTake(GetSelectedMediaItem(nullptr, i));
 		delete_midi_notes(take);
 		fill_each_n_steps_in_take(take, cmd->user, note_len);
@@ -134,12 +140,14 @@ void fill_each_n_steps_with_del_in_selected_items(COMMAND_T* cmd) {
 
 }
 
+
 struct MidiNote {
 	int idx;
 	bool mute;
 	double start_pos, end_pos;
 	int chan, pitch, vel;
 };
+
 
 constexpr double epsilon = 1e-8; // for small diff between notes
 
@@ -152,13 +160,13 @@ bool generate_data(MediaItem_Take* take, unordered_map<int, vector<vector<MidiNo
 		note.idx = n;
 		MIDI_GetNote(take, n, &sel, &note.mute, &note.start_pos, &note.end_pos, &note.chan, &note.pitch, &note.vel);
 		if ((*data)[note.pitch].empty()) {
-			(*data)[note.pitch] = { {note} };
+			(*data)[note.pitch] = {{note}};
 		} else {
-			vector<vector<MidiNote>>& line = (*data)[note.pitch];
+			vector<vector<MidiNote>> &line = (*data)[note.pitch];
 			if (note.start_pos - line.back().back().end_pos <= epsilon) {
 				line.back().push_back(note);
 			} else {
-				line.push_back({ note });
+				line.push_back({note});
 			}
 		}
 
@@ -181,8 +189,8 @@ void note_stutter_incr(COMMAND_T* cmd) {
 	bool sel = true;
 	MidiNote note;
 	Undo_BeginBlock2(nullptr);
-	for (const auto& b : data) {
-		for (const auto& v : b.second) {
+	for (const auto &b: data) {
+		for (const auto &v: b.second) {
 			new_count = v.size();
 			new_start = v.front().start_pos, new_end = v.back().end_pos;
 			new_len = (new_end - new_start) / (new_count + 1);
@@ -210,15 +218,15 @@ void note_stutter_decr(COMMAND_T* cmd) {
 	if (!generate_data(take, &data)) return;
 
 	vector<vector<MidiNote>> s_data;
-	for (const auto& p_line : data) {
-		for (const auto& line : p_line.second) {
+	for (const auto &p_line: data) {
+		for (const auto &line: p_line.second) {
 			if (line.size() > 1) {
 				s_data.push_back(move(line));
 			}
 		}
 	}
 	if (s_data.empty()) return;
-	std::sort(s_data.begin(), s_data.end(), [](const std::vector<MidiNote>& a, const std::vector<MidiNote>& b) { return a.back().idx < b.back().idx; });
+	std::sort(s_data.begin(), s_data.end(), [](const std::vector<MidiNote> &a, const std::vector<MidiNote> &b) { return a.back().idx < b.back().idx; });
 
 	MIDI_DisableSort(take);
 	int new_count;

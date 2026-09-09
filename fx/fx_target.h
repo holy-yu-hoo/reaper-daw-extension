@@ -83,6 +83,10 @@ class FX: public IFXTarget {
 
 	virtual bool is_valid() const override;
 
+	virtual std::string get_config_param(std::string par_name);
+
+	virtual bool set_config_param(std::string par_name, std::string par_value);
+
 	virtual ~FX() override = default;
 };
 
@@ -129,9 +133,13 @@ class FXChain: public IFXTarget {
 
 	virtual bool is_valid() const override;
 
+	virtual FX get_fx(int fx_idx) const;
+
 	virtual ~FXChain() override = default;
 
 	virtual int get_count();
+
+	virtual int add_fx_by_name(std::string name);
 
 	virtual int get_fx_by_guid(std::string p_guid);
 };

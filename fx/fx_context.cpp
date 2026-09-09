@@ -9,6 +9,44 @@ using std::string;
 using std::shared_ptr;
 using std::weak_ptr;
 
+namespace {
+struct FXNameParts {
+	string prefix;
+	string base;
+	string suffix;
+	bool has_prefix = false;
+	bool has_suffix = false;
+};
+
+
+FXNameParts split_fx_name(const string &full_name, const string &fx_type, const string &fx_name) {
+	FXNameParts parts;
+	parts.base = full_name;
+
+	if (!fx_type.empty()) {
+		const string prefix = fx_type + ": ";
+		if (parts.base.rfind(prefix, 0) == 0) {
+			parts.prefix = prefix;
+			parts.base = parts.base.substr(prefix.size());
+			parts.has_prefix = true;
+		}
+	}
+
+	const size_t vendor_start = fx_name.rfind(" (");
+	const size_t vendor_end = fx_name.rfind(')');
+	if (vendor_start != string::npos && vendor_end != string::npos && vendor_end > vendor_start) {
+		parts.suffix = fx_name.substr(vendor_start, vendor_end - vendor_start + 1);
+		if (parts.base.size() >= parts.suffix.size() &&
+			parts.base.compare(parts.base.size() - parts.suffix.size(), parts.suffix.size(), parts.suffix) == 0) {
+			parts.base.resize(parts.base.size() - parts.suffix.size());
+			parts.has_suffix = true;
+		}
+	}
+
+	return parts;
+}
+}
+
 
 static std::unordered_map<string, weak_ptr<IFXContext>> contexts;
 
@@ -21,44 +59,59 @@ shared_ptr<IFXContext> IFXContext::get_context(int tr_idx, int it_idx, int tk_id
 	MediaTrack* track = tr_idx == -1 ? GetMasterTrack(proj) : GetTrack(proj, tr_idx);
 	if (!track) return nullptr;
 	if (it_idx == -1) {
-		GetSetMediaTrackInfo_String(track, "GUID", &key.front(), false);
-		key.resize(strlen(key.data()));
-		if (param) key += "_rec";
-
-
-		if (contexts.find(key) == contexts.end()) {
-			context = std::shared_ptr<TrackFXContext>(
-				new TrackFXContext(track, param),
-				[key](TrackFXContext* ctx) {
-					contexts.erase(key);
-					delete ctx;
-				}
-			);
-			contexts[key] = context;
-		} else {
-			context = contexts[key].lock();
-		}
-
+		return get_context(track, param);
 	} else {
 		MediaItem* item = GetTrackMediaItem(track, it_idx);
 		if (!item) return nullptr;
 		MediaItem_Take* take = GetTake(item, tk_idx);
 		if (!take) return nullptr;
-		GetSetMediaItemTakeInfo_String(take, "GUID", &key.front(), false);
-		key.resize(strlen(key.data()));
+		return get_context(take);
+	}
+}
 
-		if (contexts.find(key) == contexts.end()) {
-			context = std::shared_ptr<TakeFXContext>(
-				new TakeFXContext(take),
-				[key](TakeFXContext* ctx) {
-					contexts.erase(key);
-					delete ctx;
-				}
-			);
-			contexts[key] = context;
-		} else {
-			context = contexts[key].lock();
-		}
+std::shared_ptr<IFXContext> IFXContext::get_context(MediaTrack* track, int param) {
+	if (!track) return nullptr;
+	shared_ptr<IFXContext> context;
+	string key;
+	key.resize(64);
+	GetSetMediaTrackInfo_String(track, "GUID", &key.front(), false);
+	key.resize(strlen(key.data()));
+	if (param) key += "_rec";
+
+	if (contexts.find(key) == contexts.end()) {
+		context = std::shared_ptr<TrackFXContext>(
+			new TrackFXContext(track, param),
+			[key](TrackFXContext* ctx) {
+				contexts.erase(key);
+				delete ctx;
+			}
+		);
+		contexts[key] = context;
+	} else {
+		context = contexts[key].lock();
+	}
+	return context;
+}
+
+std::shared_ptr<IFXContext> IFXContext::get_context(MediaItem_Take* take) {
+	if (!take) return nullptr;
+	shared_ptr<IFXContext> context;
+	string key;
+	key.resize(64);
+	GetSetMediaItemTakeInfo_String(take, "GUID", &key.front(), false);
+	key.resize(strlen(key.data()));
+
+	if (contexts.find(key) == contexts.end()) {
+		context = std::shared_ptr<TakeFXContext>(
+			new TakeFXContext(take),
+			[key](TakeFXContext* ctx) {
+				contexts.erase(key);
+				delete ctx;
+			}
+		);
+		contexts[key] = context;
+	} else {
+		context = contexts[key].lock();
 	}
 	return context;
 }
@@ -106,7 +159,7 @@ inline void TrackFXContext::set_fx_chain_open(bool open) {
 
 inline void TrackFXContext::set_fx_chain_open(bool open, int fx_idx) {
 	if (!fx_check(fx_idx)) return;
-	TrackFX_Show(m_track, fx_idx, open);
+	TrackFX_Show(m_track, m_rec ? MAKE_FX_REC(fx_idx) : fx_idx, open);
 }
 
 inline bool TrackFXContext::get_fx_enabled(int fx_idx) {
@@ -172,7 +225,7 @@ string TrackFXContext::get_fx_chunk(int fx_idx) {
 		return "";
 	}
 
-	string guid = get_fx_guid(m_rec ? MAKE_FX_REC(fx_idx) : fx_idx);
+	string guid = get_fx_guid(fx_idx);
 
 	if (guid.empty()) {
 		#if defined(_DEBUG)
@@ -219,6 +272,7 @@ string TrackFXContext::get_fx_chain_chunk() {
 	}
 
 	int s = chunk.find(m_rec ? "<FXCHAIN_REC" : "<FXCHAIN", 0);
+	if (s == string::npos) return "";
 	s = chunk.find("<", s);
 	if (s == string::npos) return "";
 	int c = 2;
@@ -252,7 +306,7 @@ void TrackFXContext::set_fx_chunk(int fx_idx, string fx_chunk) {
 		return;
 	}
 
-	string guid = get_fx_guid(m_rec ? MAKE_FX_REC(fx_idx) : fx_idx);
+	string guid = get_fx_guid(fx_idx);
 
 	if (guid.empty()) {
 		#if defined(_DEBUG)
@@ -299,10 +353,13 @@ void TrackFXContext::set_fx_chain_chunk(string fx_chunk) {
 	}
 
 	int s = chunk.find(m_rec ? "<FXCHAIN_REC" : "<FXCHAIN", 0);
+	if (s == string::npos) return;
 	int e;
 	if ((m_rec ? TrackFX_GetRecCount(m_track) : TrackFX_GetCount(m_track)) <= 0) {
 		e = chunk.find(">", s);
-		s = e - 2, e -= 1;
+		if (e == string::npos) return;
+		s = e - 2;
+		e -= 1;
 	} else {
 		s = chunk.find("<", s);
 		if (s == string::npos) return;
@@ -355,6 +412,11 @@ string TrackFXContext::get_config_param(int fx_idx, const string &param_name) {
 	return param;
 }
 
+bool TrackFXContext::set_config_param(int fx_idx, const std::string &param_name, const std::string &param_value) {
+	if (!fx_check(fx_idx)) return false;
+	return TrackFX_SetNamedConfigParm(m_track, m_rec ? MAKE_FX_REC(fx_idx) : fx_idx, param_name.data(), param_value.data());
+}
+
 inline string TrackFXContext::get_full_name(int fx_idx) {
 	if (!fx_check(fx_idx)) return "";
 	string name = get_config_param(fx_idx, "renamed_name");
@@ -364,18 +426,28 @@ inline string TrackFXContext::get_full_name(int fx_idx) {
 
 inline string TrackFXContext::get_name(int fx_idx) {
 	if (!fx_check(fx_idx)) return "";
-	string name = get_full_name(fx_idx);
-	string type = get_config_param(fx_idx, "fx_type") + ": ";
-	string vendor = " ("s + get_config_param(fx_idx, "fx_name") + ")"s;
-	int s = 0, e = name.size() - 1;
-	if (name.find(type) == 0) {
-		s = type.size();
-	}
+	const string full_name = get_full_name(fx_idx);
+	const string fx_type = get_config_param(fx_idx, "fx_type");
+	const string fx_name = get_config_param(fx_idx, "fx_name");
+	return split_fx_name(full_name, fx_type, fx_name).base;
+}
 
-	if (name.rfind(vendor) == name.size() - vendor.size()) {
-		e = name.size() - vendor.size();
-	}
-	return name.substr(s, e - s);
+bool TrackFXContext::set_full_name(int fx_idx, std::string name) {
+	return set_config_param(fx_idx, "renamed_name", name);
+}
+
+bool TrackFXContext::set_name(int fx_idx, std::string name) {
+	if (!fx_check(fx_idx)) return false;
+	const string full_name = get_full_name(fx_idx);
+	const string fx_type = get_config_param(fx_idx, "fx_type");
+	const string fx_name = get_config_param(fx_idx, "fx_name");
+	const FXNameParts parts = split_fx_name(full_name, fx_type, fx_name);
+	string new_name;
+	if (parts.has_prefix) new_name += parts.prefix;
+	new_name += name;
+	if (parts.has_suffix) new_name += parts.suffix;
+
+	return set_config_param(fx_idx, "renamed_name", new_name);
 }
 
 inline void TrackFXContext::_undo_begin_block(ReaProject* project) {
@@ -413,7 +485,13 @@ inline std::string TrackFXContext::get_key() {
 }
 
 bool TrackFXContext::is_valid() {
-	return !m_guid.empty() and BR_GetMediaTrackByGUID(proj, m_guid.data()) != nullptr;
+	if (m_guid.empty()) return false;
+	GUID* guid = GetTrackGUID(GetMasterTrack(proj));
+	return m_guid == guid_to_string(guid) or BR_GetMediaTrackByGUID(proj, m_guid.data()) != nullptr;
+}
+
+int TrackFXContext::add_fx_by_name(std::string name) {
+	return TrackFX_AddByName(m_track, name.data(), m_rec, -1);
 }
 
 inline bool TrackFXContext::_fx_idx_valid(int fx_idx) {
@@ -673,11 +751,8 @@ void TakeFXContext::set_fx_chain_chunk(std::string fx_chunk) {
 
 	int s = chunk.find(guid, 0);
 	int e;
-
 	if (TakeFX_GetCount(m_take) <= 0) {
 		return;
-		e = chunk.find(">", s);
-		s = e - 2, e -= 1;
 	} else {
 		s = chunk.find("<TAKEFX", s);
 		s = chunk.find("<", s);
@@ -727,6 +802,11 @@ string TakeFXContext::get_config_param(int fx_idx, const string &param_name) {
 	return param;
 }
 
+bool TakeFXContext::set_config_param(int fx_idx, const std::string &param_name, const std::string &param_value) {
+	if (!fx_check(fx_idx)) return false;
+	return TakeFX_SetNamedConfigParm(m_take, fx_idx, param_name.data(), param_value.data());
+}
+
 inline string TakeFXContext::get_full_name(int fx_idx) {
 	if (!fx_check(fx_idx)) return "";
 	string name = get_config_param(fx_idx, "renamed_name");
@@ -736,18 +816,28 @@ inline string TakeFXContext::get_full_name(int fx_idx) {
 
 inline string TakeFXContext::get_name(int fx_idx) {
 	if (!fx_check(fx_idx)) return "";
-	string name = get_full_name(fx_idx);
-	string type = get_config_param(fx_idx, "fx_type") + ": ";
-	string vendor = " ("s + get_config_param(fx_idx, "fx_name") + ")"s;
-	int s = 0, e = name.size() - 1;
-	if (name.find(type) == 0) {
-		s = type.size();
-	}
+	const string full_name = get_full_name(fx_idx);
+	const string fx_type = get_config_param(fx_idx, "fx_type");
+	const string fx_name = get_config_param(fx_idx, "fx_name");
+	return split_fx_name(full_name, fx_type, fx_name).base;
+}
 
-	if (name.rfind(vendor) == name.size() - vendor.size()) {
-		e = name.size() - vendor.size();
-	}
-	return name.substr(s, e - s);
+bool TakeFXContext::set_full_name(int fx_idx, std::string name) {
+	return set_config_param(fx_idx, "renamed_name", name);
+}
+
+bool TakeFXContext::set_name(int fx_idx, std::string name) {
+	if (!fx_check(fx_idx)) return false;
+	const string full_name = get_full_name(fx_idx);
+	const string fx_type = get_config_param(fx_idx, "fx_type");
+	const string fx_name = get_config_param(fx_idx, "fx_name");
+	const FXNameParts parts = split_fx_name(full_name, fx_type, fx_name);
+	string new_name;
+	if (parts.has_prefix) new_name += parts.prefix;
+	new_name += name;
+	if (parts.has_suffix) new_name += parts.suffix;
+
+	return set_config_param(fx_idx, "renamed_name", new_name);
 }
 
 inline void TakeFXContext::_undo_begin_block(ReaProject* project) {
@@ -785,6 +875,10 @@ inline std::string TakeFXContext::get_key() {
 bool TakeFXContext::is_valid() {
 	MediaItem_Take* take = get_media_item_take_by_guid(proj, m_guid);
 	return take != nullptr;
+}
+
+int TakeFXContext::add_fx_by_name(std::string name) {
+	return TakeFX_AddByName(m_take, name.data(), -1);
 }
 
 inline bool TakeFXContext::_fx_idx_valid(int fx_idx) {
