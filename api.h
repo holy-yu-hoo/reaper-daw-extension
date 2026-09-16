@@ -57,6 +57,7 @@ typedef struct COMMAND_T {
 
 	int cmd_id;
 	INT_PTR user;
+	int(*get_enabled)(COMMAND_T*);
 } COMMAND_T;
 
 

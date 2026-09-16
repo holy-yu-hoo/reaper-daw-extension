@@ -27,7 +27,7 @@ void FXObserver::propagate_extend(ChangeType call, IFXContext* ctx, int fx_idx, 
 static FX g_last_focused_fx{};
 static FXChain g_last_focused_fx_chain{};
 
-void FXObserver::capture_state(const FXChain* chain, std::vector<FXInfo> &state_info) {
+void FXObserver::capture_state(const FXChain* chain, std::vector<FXInfo>& state_info) {
 	if (!chain || !chain->is_valid()) {
 		state_info.clear();
 		return;
@@ -46,7 +46,7 @@ void FXObserver::capture_state(const FXChain* chain, std::vector<FXInfo> &state_
 	}
 }
 
-void FXObserver::detect_changes(std::vector<FXInfo> &state_a, std::vector<FXInfo> &state_b) {
+void FXObserver::detect_changes(std::vector<FXInfo>& state_a, std::vector<FXInfo>& state_b) {
 	capture_state(m_last_focused_fx_chain, state_a);
 	int sz = min(state_a.size(), state_b.size());
 	int f = 0;
@@ -79,7 +79,7 @@ void FXObserver::detect_changes(std::vector<FXInfo> &state_a, std::vector<FXInfo
 			sz -= 1;
 
 		} else { // move
-			g = std::find_if(state_a.begin(), state_a.end(), [&state_b,f](const FXInfo &info) { return info.guid == state_b[f].guid; }) - state_a.begin();
+			g = std::find_if(state_a.begin(), state_a.end(), [&state_b, f](const FXInfo& info) { return info.guid == state_b[f].guid; }) - state_a.begin();
 			if (g >= static_cast<int>(state_a.size())) {
 				f++;
 				continue;
@@ -107,59 +107,58 @@ void FXObserver::refresh_last_focused_fx_index() {
 int FXObserver::Extended(int call, void* parm1, void* parm2, void* parm3) {
 	switch (call) {
 
-		case CSURF_EXT_SETFOCUSEDFX: {
-			#ifdef _DEBUG
-			ShowConsoleMsg("Change focused fx\n");
-			#endif
+	case CSURF_EXT_SETFOCUSEDFX: {
+#ifdef _DEBUG
+		ShowConsoleMsg("Change focused fx\n");
+#endif
 
-			set_focused_fx_handler();
-			break;
-		}
-		case static_cast<int>(ChangeType::Added): {
-			fx_renamer(static_cast<IFXContext*>(parm1));
-			fx_add_handler(static_cast<IFXContext*>(parm1), reinterpret_cast<INT_PTR>(parm2));
-			break;
-		}
-		case static_cast<int>(ChangeType::Removed): {
-			fx_renamer(static_cast<IFXContext*>(parm1));
-			fx_remove_handler(static_cast<IFXContext*>(parm1), reinterpret_cast<INT_PTR>(parm2));
-			break;
-		}
-		case static_cast<int>(ChangeType::Moved): {
-			refresh_last_focused_fx_index();
-			fx_renamer(static_cast<IFXContext*>(parm1));
-			fx_move_handler(static_cast<IFXContext*>(parm1), reinterpret_cast<INT_PTR>(parm2));
+		set_focused_fx_handler();
+		break;
+	}
+	case static_cast<int>(ChangeType::Added): {
+		fx_renamer(static_cast<IFXContext*>(parm1));
+		fx_add_handler(static_cast<IFXContext*>(parm1), reinterpret_cast<INT_PTR>(parm2));
+		break;
+	}
+	case static_cast<int>(ChangeType::Removed): {
+		fx_renamer(static_cast<IFXContext*>(parm1));
+		fx_remove_handler(static_cast<IFXContext*>(parm1), reinterpret_cast<INT_PTR>(parm2));
+		break;
+	}
+	case static_cast<int>(ChangeType::Moved): {
+		refresh_last_focused_fx_index();
+		fx_renamer(static_cast<IFXContext*>(parm1));
+		fx_move_handler(static_cast<IFXContext*>(parm1), reinterpret_cast<INT_PTR>(parm2));
+		break;
+	}
+	case static_cast<int>(ChangeType::Renamed): {
+		fx_renamer(static_cast<IFXContext*>(parm1));
+		fx_rename_handler(static_cast<IFXContext*>(parm1), reinterpret_cast<INT_PTR>(parm2));
+		break;
+	}
 
-			break;
+	case static_cast<int>(ChangeType::Any): {
+		refresh_last_focused_fx_index();
+		fx_renamer(static_cast<IFXContext*>(parm1));
+		break;
+	}
+	case CSURF_EXT_SETFXCHANGE: {
+		refresh_last_focused_fx_index();
+		MediaTrack* track = static_cast<MediaTrack*>(parm1);
+		if (!track) break;
+		const INT_PTR flags = reinterpret_cast<INT_PTR>(parm2);
+		if (track == GetMasterTrack(proj)) {
+			std::shared_ptr<IFXContext> norm_ctx = IFXContext::get_context(track, 0);
+			if (norm_ctx) fx_renamer(norm_ctx.get());
+			std::shared_ptr<IFXContext> rec_ctx = IFXContext::get_context(track, 1);
+			if (rec_ctx) fx_renamer(rec_ctx.get());
+		} else {
+			std::shared_ptr<IFXContext> ctx = IFXContext::get_context(track, flags & 1);
+			if (ctx) fx_renamer(ctx.get());
 		}
-		case static_cast<int>(ChangeType::Renamed): {
-			fx_renamer(static_cast<IFXContext*>(parm1));
-			fx_rename_handler(static_cast<IFXContext*>(parm1), reinterpret_cast<INT_PTR>(parm2));
-			break;
-		}
-
-		case static_cast<int>(ChangeType::Any): {
-			refresh_last_focused_fx_index();
-			fx_renamer(static_cast<IFXContext*>(parm1));
-			break;
-		}
-		case CSURF_EXT_SETFXCHANGE: {
-			refresh_last_focused_fx_index();
-			MediaTrack* track = static_cast<MediaTrack*>(parm1);
-			if (!track) break;
-			const INT_PTR flags = reinterpret_cast<INT_PTR>(parm2);
-			if (track == GetMasterTrack(proj)) {
-				std::shared_ptr<IFXContext> norm_ctx = IFXContext::get_context(track, 0);
-				if (norm_ctx) fx_renamer(norm_ctx.get());
-				std::shared_ptr<IFXContext> rec_ctx = IFXContext::get_context(track, 1);
-				if (rec_ctx) fx_renamer(rec_ctx.get());
-			} else {
-				std::shared_ptr<IFXContext> ctx = IFXContext::get_context(track, flags & 1);
-				if (ctx) fx_renamer(ctx.get());
-			}
-			break;
-		}
-		default: {};
+		break;
+	}
+	default: {};
 	}
 
 	return 0;
@@ -201,33 +200,33 @@ void FXObserver::set_focused_fx_handler() {
 }
 
 void FXObserver::fx_add_handler(IFXContext* ctx, int fx_idx) {
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	ShowConsoleMsg("add fx\n");
-	#endif
+#endif
 }
 
 void FXObserver::fx_remove_handler(IFXContext* ctx, int fx_idx) {
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	ShowConsoleMsg("remove fx\n");
-	#endif
+#endif
 }
 
 void FXObserver::fx_move_handler(IFXContext* ctx, int fx_idx) {
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	ShowConsoleMsg("move fx\n");
-	#endif
+#endif
 }
 
 void FXObserver::fx_rename_handler(IFXContext* ctx, int fx_idx) {
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	ShowConsoleMsg("rename fx\n");
-	#endif
+#endif
 }
 
 void FXObserver::fx_any_handler(IFXContext* ctx, int fx_idx) {
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	ShowConsoleMsg("change fx\n");
-	#endif
+#endif
 	fx_renamer(ctx);
 }
 
