@@ -23,7 +23,6 @@ set(SOURCES
 	misc/utils.cpp
 	fx/fx_context.cpp
 	fx/fx_target.cpp
-	fx/fx_preset.cpp
 	fx/utils.cpp
 	fx/fx.cpp
 	fx/fx_observer.cpp
@@ -42,7 +41,6 @@ set(HEADERS
 	misc/utils.h
 	fx/fx_context.h
 	fx/fx_target.h
-	fx/fx_preset.h
 	fx/fx_observer.h
 	fx/utils.h
 	fx/fx.h

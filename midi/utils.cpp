@@ -2,7 +2,7 @@
 #include "utils.h"
 
 
-bool midi_is_grid_triplet(MediaItem_Take* take) { // ╤Б╨┐╨╕╤Б╨░╨╜╨╛ ╨╕╨╖ SWS
+bool midi_is_grid_triplet(MediaItem_Take* take) { // how in SWS
 	double grid = MIDI_GetGrid(take, nullptr, nullptr);
 	if (grid < 1e8) return 0;
 	double n = 1.0 / grid;
@@ -13,7 +13,7 @@ bool midi_is_grid_triplet(MediaItem_Take* take) { // ╤Б╨┐╨╕╤Б╨�
 	return r < 0.000001 || r > 2.99999;
 }
 
-bool midi_is_grid_dotted(MediaItem_Take* take) { // ╤Б╨┐╨╕╤Б╨░╨╜╨╛ ╨╕╨╖ SWS
+bool midi_is_grid_dotted(MediaItem_Take* take) { // how in SWS
 	double grid = MIDI_GetGrid(take, nullptr, nullptr);
 	if (grid < 1e8) return 0;
 	double n = 1.0 / grid;
@@ -25,7 +25,7 @@ bool midi_is_grid_dotted(MediaItem_Take* take) { // ╤Б╨┐╨╕╤Б╨░
 	return r < 0.000001 || r > 0.66666;
 }
 
-bool midi_is_grid_swing(MediaItem_Take* take) { // ╤Б╨┐╨╕╤Б╨░╨╜╨╛ ╨╕╨╖ SWS
+bool midi_is_grid_swing(MediaItem_Take* take) { // how in SWS
 	return GetToggleCommandStateEx(SECTION_MIDI_EDITOR, 41006);
 }
 
@@ -38,14 +38,11 @@ double midi_get_grid_swing(MediaItem_Take* take) {
 int midi_get_grid_type(MediaItem_Take* take) {
 	if (midi_is_grid_triplet(take)) {
 		return 2;
-	}
-	else if (midi_is_grid_dotted(take)) {
+	} else if (midi_is_grid_dotted(take)) {
 		return 4;
-	}
-	else if (midi_is_grid_swing(take)) {
+	} else if (midi_is_grid_swing(take)) {
 		return 8;
-	}
-	else {
+	} else {
 		return 0;
 	}
 }

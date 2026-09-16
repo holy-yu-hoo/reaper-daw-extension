@@ -1,18 +1,18 @@
 #pragma once
 
 class IFXContext {
-	public:
-	virtual bool get_fx_open(int fx_idx) =0;
+public:
+	virtual bool get_fx_open(int fx_idx) = 0;
 
-	virtual void set_fx_open(int fx_idx, bool open) =0;
+	virtual void set_fx_open(int fx_idx, bool open) = 0;
 
-	virtual bool get_fx_chain_open() =0;
+	virtual bool get_fx_chain_open() = 0;
 
-	virtual int get_fx_chain_open(bool more_specifically) =0; // returns the number of the open effect, -1 or -2 (see TrackFX_GetChainVisible)
+	virtual int get_fx_chain_open(bool more_specifically) = 0; // returns the number of the open effect, -1 or -2 (see TrackFX_GetChainVisible)
 
-	virtual void set_fx_chain_open(bool open) =0;
+	virtual void set_fx_chain_open(bool open) = 0;
 
-	virtual void set_fx_chain_open(bool open, int fx_idx) =0;
+	virtual void set_fx_chain_open(bool open, int fx_idx) = 0;
 
 	virtual bool get_fx_enabled(int fx_idx) = 0;
 
@@ -22,37 +22,34 @@ class IFXContext {
 
 	virtual void set_fx_offline(int fx_idx, bool offline) = 0;
 
-	virtual void delete_fx(int fx_idx) =0;
+	virtual void delete_fx(int fx_idx) = 0;
 
-	virtual bool reset_preset(int fx_idx) =0;
+	virtual bool reset_preset(int fx_idx) = 0;
 
-	virtual int get_count() =0;
+	virtual int get_count() = 0;
 
-	virtual std::string get_fx_guid(int fx_idx) =0;
+	virtual std::string get_fx_guid(int fx_idx) = 0;
 
-	virtual std::string get_guid() =0;
+	virtual std::string get_guid() = 0;
 
-	virtual std::string get_fx_chunk(int fx_idx) =0;
+	virtual std::string get_fx_chunk(int fx_idx) = 0;
 
-	virtual std::string get_fx_chain_chunk() =0;
+	virtual bool set_fx_chunk(int fx_idx, std::string fx_chunk) = 0;
 
-	virtual void set_fx_chunk(int fx_idx, std::string fx_chunk) =0;
 
-	virtual void set_fx_chain_chunk(std::string fx_chunk) =0;
+	virtual std::string get_undo_str() = 0;
 
-	virtual std::string get_undo_str() =0;
+	virtual std::string get_config_param(int fx_idx, const std::string& param_name) = 0;
 
-	virtual std::string get_config_param(int fx_idx, const std::string &param_name) =0;
+	virtual bool set_config_param(int fx_idx, const std::string& param_name, const std::string& param_value) = 0;
 
-	virtual bool set_config_param(int fx_idx, const std::string &param_name, const std::string &param_value) =0;
+	virtual std::string get_full_name(int fx_idx) = 0; // name kind: "type: name (vendor)"
 
-	virtual std::string get_full_name(int fx_idx) =0; // name kind: "type: name (vendor)"
+	virtual std::string get_name(int fx_idx) = 0; // name kind: "name" (without "type: " and " (vendor)")
 
-	virtual std::string get_name(int fx_idx) =0; // name kind: "name" (without "type: " and " (vendor)")
+	virtual bool set_full_name(int fx_idx, std::string name) = 0;
 
-	virtual bool set_full_name(int fx_idx, std::string name) =0;
-
-	virtual bool set_name(int fx_idx, std::string name) =0;
+	virtual bool set_name(int fx_idx, std::string name) = 0;
 
 	virtual ~IFXContext() = default;
 
@@ -60,35 +57,38 @@ class IFXContext {
 	static std::shared_ptr<IFXContext> get_context(MediaTrack* track, int param = 0); // return track or take context
 	static std::shared_ptr<IFXContext> get_context(MediaItem_Take* take); // return track or take context
 
-	virtual void _undo_begin_block(ReaProject* project) =0;
+	virtual void _undo_begin_block(ReaProject* project) = 0;
 
-	virtual void _undo_end_block(ReaProject* project, std::string undo_str) =0;
+	virtual void _undo_end_block(ReaProject* project, std::string undo_str) = 0;
 
-	virtual bool operator==(const IFXContext &other) =0;
+	virtual bool operator==(const IFXContext& other) = 0;
 
-	virtual bool operator!=(const IFXContext &other) =0;
+	virtual bool operator!=(const IFXContext& other) = 0;
 
-	virtual bool operator!() =0;
+	virtual bool operator!() = 0;
 
-	virtual operator bool() =0;
+	virtual operator bool() = 0;
 
-	virtual std::string get_key() =0;
+	virtual std::string get_key() = 0;
 
-	virtual bool is_valid() =0;
+	virtual bool is_valid() = 0;
 
-	virtual int add_fx_by_name(std::string name) =0;
+	virtual int add_fx_by_name(std::string name) = 0;
+	virtual void copy_fx(int fx_idx, IFXContext* dest, int dest_fx_idx) = 0;
+	virtual void move_fx(int fx_idx, IFXContext* dest, int dest_fx_idx) = 0;
 
-	protected:
-	virtual bool _fx_idx_valid(int fx_idx) =0;
+protected:
+	virtual bool _fx_idx_valid(int fx_idx) = 0;
 };
 
 
-class TrackFXContext: public IFXContext {
+class TrackFXContext : public IFXContext {
 	MediaTrack* m_track = nullptr;
 	bool m_rec;
 	std::string m_guid;
+	friend class TakeFXContext;
 
-	public:
+public:
 	TrackFXContext();
 
 	TrackFXContext(int tr_idx, bool rec = false);
@@ -127,17 +127,13 @@ class TrackFXContext: public IFXContext {
 
 	virtual std::string get_fx_chunk(int fx_idx) override;
 
-	virtual std::string get_fx_chain_chunk() override;
-
-	virtual void set_fx_chunk(int fx_idx, std::string fx_chunk) override;
-
-	virtual void set_fx_chain_chunk(std::string fx_chunk) override;
+	virtual bool set_fx_chunk(int fx_idx, std::string fx_chunk) override;
 
 	virtual std::string get_undo_str() override;
 
-	virtual std::string get_config_param(int fx_idx, const std::string &param_name) override;
+	virtual std::string get_config_param(int fx_idx, const std::string& param_name) override;
 
-	virtual bool set_config_param(int fx_idx, const std::string &param_name, const std::string &param_value) override;
+	virtual bool set_config_param(int fx_idx, const std::string& param_name, const std::string& param_value) override;
 
 	virtual std::string get_full_name(int fx_idx) override;
 
@@ -153,9 +149,9 @@ class TrackFXContext: public IFXContext {
 
 	virtual void _undo_end_block(ReaProject* project, std::string undo_str) override;
 
-	virtual bool operator==(const IFXContext &other) override;
+	virtual bool operator==(const IFXContext& other) override;
 
-	virtual bool operator!=(const IFXContext &other) override;
+	virtual bool operator!=(const IFXContext& other) override;
 
 	virtual bool operator!() override;
 
@@ -167,16 +163,20 @@ class TrackFXContext: public IFXContext {
 
 	virtual int add_fx_by_name(std::string name) override;
 
-	protected:
+	virtual void copy_fx(int fx_idx, IFXContext* dest, int dest_fx_idx) override;
+	virtual void move_fx(int fx_idx, IFXContext* dest, int dest_fx_idx) override;
+
+protected:
 	virtual bool _fx_idx_valid(int fx_idx) override;
 };
 
 
-class TakeFXContext: public IFXContext {
+class TakeFXContext : public IFXContext {
 	MediaItem_Take* m_take = nullptr;
 	std::string m_guid;
+	friend class TrackFXContext;
 
-	public:
+public:
 	TakeFXContext();
 
 	TakeFXContext(int tr_idx, int it_idx, int tk_idx);
@@ -215,17 +215,14 @@ class TakeFXContext: public IFXContext {
 
 	virtual std::string get_fx_chunk(int fx_idx) override;
 
-	virtual std::string get_fx_chain_chunk() override;
 
-	virtual void set_fx_chunk(int fx_idx, std::string fx_chunk) override;
-
-	virtual void set_fx_chain_chunk(std::string fx_chunk) override;
+	virtual bool set_fx_chunk(int fx_idx, std::string fx_chunk) override;
 
 	virtual std::string get_undo_str() override;
 
-	virtual std::string get_config_param(int fx_idx, const std::string &param_name) override;
+	virtual std::string get_config_param(int fx_idx, const std::string& param_name) override;
 
-	virtual bool set_config_param(int fx_idx, const std::string &param_name, const std::string &param_value) override;
+	virtual bool set_config_param(int fx_idx, const std::string& param_name, const std::string& param_value) override;
 
 	virtual std::string get_full_name(int fx_idx) override;
 
@@ -241,9 +238,9 @@ class TakeFXContext: public IFXContext {
 
 	virtual void _undo_end_block(ReaProject* project, std::string undo_str) override;
 
-	virtual bool operator==(const IFXContext &other) override;
+	virtual bool operator==(const IFXContext& other) override;
 
-	virtual bool operator!=(const IFXContext &other) override;
+	virtual bool operator!=(const IFXContext& other) override;
 
 	virtual bool operator!() override;
 
@@ -255,6 +252,9 @@ class TakeFXContext: public IFXContext {
 
 	virtual int add_fx_by_name(std::string name) override;
 
-	protected:
+	virtual void copy_fx(int fx_idx, IFXContext* dest, int dest_fx_idx) override;
+	virtual void move_fx(int fx_idx, IFXContext* dest, int dest_fx_idx) override;
+
+protected:
 	virtual bool _fx_idx_valid(int fx_idx) override;
 };

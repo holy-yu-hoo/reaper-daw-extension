@@ -11,6 +11,8 @@ void delete_last_focused_(COMMAND_T* cmd);
 
 void reset_last_focused_(COMMAND_T* cmd);
 
+void move_last_focused_fx_(COMMAND_T* cmd);
+
 void ab_comparer(COMMAND_T* cmd);
 
 void fx_renamer(IFXContext* ctx);

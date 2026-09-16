@@ -19,3 +19,7 @@
 int get_selected_fx(MediaTrack* track, bool rec = false);
 
 int get_selected_fx(MediaItem_Take* take);
+
+void prevent_autofloat_created_fx_windows_save();
+
+void prevent_autofloat_created_fx_windows_restore();
