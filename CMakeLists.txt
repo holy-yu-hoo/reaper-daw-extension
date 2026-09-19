@@ -27,6 +27,8 @@ set(SOURCES
 	fx/fx.cpp
 	fx/fx_observer.cpp
 	track/track.cpp
+	track/track_observer.cpp
+	track/utils.cpp
 )
 
 set(HEADERS
@@ -45,6 +47,8 @@ set(HEADERS
 	fx/utils.h
 	fx/fx.h
 	track/track.h
+	track/track_observer.h
+	track/utils.h
 )
 
 

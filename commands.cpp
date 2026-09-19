@@ -8,7 +8,7 @@
 #include "fx/fx_observer.h"
 #include "track/track.h"
 
-
+// @formatter:off
 std::vector<COMMAND_T> commands = {
 	{ ID_PREFIX "INSERT_4_BARS_MIDI_ITEM_AT_CURSOR",NAME_PREFIX "Insert 4 bars midi item at cursor", nullptr, insert_4_bars_midi_item_at_cursor, SECTION_MAIN, nullptr },
 	{ ID_PREFIX "FX_A/B_COMPARER", NAME_PREFIX "FX A/B comparer", nullptr, ab_comparer, SECTION_MAIN, nullptr, 0, 0 },
@@ -58,22 +58,23 @@ std::vector<COMMAND_T> commands = {
 	{ ID_PREFIX "GO_TO_PREVIOUS_TRACK_CYCLE_KEEP_SELECTION",NAME_PREFIX "Go to previous track keep selection (cycle)", nullptr, select_track_cycle_keep_selection, SECTION_MAIN, nullptr,0,-1 },
 	{ ID_PREFIX "SELECT_NEXT_TRACKS_CYCLE",NAME_PREFIX "Select next tracks (cycle)", nullptr, select_tracks_cycle, SECTION_MAIN, nullptr,0,1 },
 	{ ID_PREFIX "SELECT_PREVIOUS_TRACKS_CYCLE",NAME_PREFIX "Select previous tracks (cycle)", nullptr, select_tracks_cycle, SECTION_MAIN, nullptr,0,-1 },
-	{ ID_PREFIX "AUTO_SOLO_LAST_TOUCH_TRACK",NAME_PREFIX "Auto-solo last touched track", nullptr, TrackOSC::set_mode, SECTION_MAIN, nullptr,0,2,TrackOSC::get_mode, },
-	{ ID_PREFIX "AUTO_SOLO_SELECTED_TRACKS",NAME_PREFIX "Auto-solo selected tracks", nullptr, TrackOSC::set_mode, SECTION_MAIN, nullptr,0,4,TrackOSC::get_mode, },
-	{ ID_PREFIX "AUTO_SOLO_LAST_TOUCH_TRACK_SELECTED",NAME_PREFIX "Auto-solo last touched selected track", nullptr, TrackOSC::set_mode, SECTION_MAIN, nullptr,0,6,TrackOSC::get_mode, },
-	{ ID_PREFIX "AUTO_SOLO_DISABLE",NAME_PREFIX "Disable auto-solo", nullptr, TrackOSC::set_mode, SECTION_MAIN, nullptr,0,0,TrackOSC::get_mode, },
+	{ ID_PREFIX "AUTO_SOLO_LAST_TOUCH_TRACK",NAME_PREFIX "Auto-solo last touched track", nullptr, TrackObserver::set_auto_solo_mode, SECTION_MAIN, nullptr,0,1,TrackObserver::get_auto_solo_mode, },
+	{ ID_PREFIX "AUTO_SOLO_SELECTED_TRACKS",NAME_PREFIX "Auto-solo selected tracks", nullptr, TrackObserver::set_auto_solo_mode, SECTION_MAIN, nullptr,0,2,TrackObserver::get_auto_solo_mode, },
+	{ ID_PREFIX "AUTO_SOLO_LAST_TOUCH_TRACK_SELECTED",NAME_PREFIX "Auto-solo last touched selected track", nullptr, TrackObserver::set_auto_solo_mode, SECTION_MAIN, nullptr,0,4,TrackObserver::get_auto_solo_mode, },
+	{ ID_PREFIX "AUTO_SOLO_DISABLE",NAME_PREFIX "Disable auto-solo", nullptr, TrackObserver::set_auto_solo_mode, SECTION_MAIN, nullptr,0,0,TrackObserver::get_auto_solo_mode, },
 	{ ID_PREFIX "SET_LOOP_POINTS_TO_ACTIVE_MIDI_TAKE",  NAME_PREFIX "Set loop points to active midi take",  nullptr,  set_loop_time_range_to_active_take,  SECTION_MIDI_EDITOR,  nullptr,0,1 },
 	{ ID_PREFIX "SET_TIME_SELECTION_TO_ACTIVE_MIDI_TAKE",  NAME_PREFIX "Set time selection to active midi take",  nullptr,  set_loop_time_range_to_active_take,  SECTION_MIDI_EDITOR,  nullptr,  0,  0 },
 	{ ID_PREFIX "MOVE_LAST_FOCUSED_FX_UP",NAME_PREFIX "Move last focused fx up",nullptr,move_last_focused_fx_,SECTION_MAIN,nullptr,0,-1 },
 	{ ID_PREFIX "MOVE_LAST_FOCUSED_FX_DOWN",NAME_PREFIX "Move last focused fx down",nullptr,move_last_focused_fx_,SECTION_MAIN,nullptr,0,1 },
 };
+//@formatter:on
 
 bool commands_init() {
 	if (!register_commands(commands)) return false;
 	// LAST_FOCUSED_FX::init();
 	plugin_register("csurf_inst", static_cast<void*>(&g_fx_observer));
 	plugin_register("timer", static_cast<void*>(&FXObserver::fx_change_observer));
-	plugin_register("csurf_inst", static_cast<void*>(&g_track_osc));
+	plugin_register("csurf_inst", static_cast<void*>(&g_track_observer));
 	return true;
 }
 
@@ -81,6 +82,6 @@ bool commands_exit() {
 	unregister_commands(commands);
 	plugin_register("-csurf_inst", static_cast<void*>(&g_fx_observer));
 	plugin_register("-timer", static_cast<void*>(&FXObserver::fx_change_observer));
-	plugin_register("-csurf_inst", static_cast<void*>(&g_track_osc));
+	plugin_register("-csurf_inst", static_cast<void*>(&g_track_observer));
 	return true;
 }
