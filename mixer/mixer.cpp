@@ -118,7 +118,7 @@ void update_mixer_track(MediaTrack* track) { // observe change last touch track 
 	plugin_register("timer", static_cast<void*>(scroll_to_track));
 }
 
-void show_mixer(COMMAND_T* cmd) {
+void smart_show_mixer(COMMAND_T* cmd) {
 	int context;
 	double position;
 	MediaTrack* track = BR_TrackAtMouseCursor(&context, &position);
@@ -148,4 +148,40 @@ void show_mixer(COMMAND_T* cmd) {
 
 	SetForegroundWindow(mixer);
 	start_mixer_watcher(mixer);
+}
+
+void smart_show_mixer_without_hide(COMMAND_T* cmd) {
+	int context;
+	double position;
+	MediaTrack* track = BR_TrackAtMouseCursor(&context, &position);
+	if (!track || context == 1 || track == GetMasterTrack(nullptr)) return;
+
+
+	if (track == g_current_track.load() && mixer_is_visible()) {
+		Main_OnCommand(40078, 0);
+		stop_mixer_watcher();
+		g_current_track.store(nullptr);
+		return;
+	}
+
+	// Сбрасываем слежку за фокусом, если она была запущена ранее
+	stop_mixer_watcher();
+
+	if (!mixer_is_visible()) {
+		Main_OnCommand(40078, 0);
+		Sleep(50);
+	}
+
+	if (cmd->user) SetOnlyTrackSelected(track);
+
+	g_current_track.store(track);
+	g_scroll_target.store(track);
+	g_scroll_start = std::chrono::steady_clock::now();
+	plugin_register("timer", static_cast<void*>(scroll_to_track));
+
+	bool is_dock;
+	HWND mixer = static_cast<HWND>(BR_Win32_GetMixerHwnd(&is_dock));
+	if (!mixer) return;
+
+	SetForegroundWindow(mixer);
 }

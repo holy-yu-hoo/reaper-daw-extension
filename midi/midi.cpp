@@ -7,7 +7,7 @@ using std::operator""s;
 using std::vector;
 using std::unordered_map;
 
-void fill_each_n_steps(MediaItem_Take* take, float step, double len, bool sel = false, bool mute = false, int chan = 0, int pitch = 60, int vel = 127) {
+static void fill_each_n_steps(MediaItem_Take* take, float step, double len, bool sel = false, bool mute = false, int chan = 0, int pitch = 60, int vel = 127) {
 	MediaItem* item = GetMediaItemTake_Item(take);
 	double take_start = GetMediaItemInfo_Value(item, "D_POSITION");
 	double take_end = MIDI_GetPPQPosFromProjTime(take, take_start + GetMediaItemInfo_Value(item, "D_LENGTH"));
@@ -37,6 +37,7 @@ void fill_each_n_steps(MediaItem_Take* take, float step, double len, bool sel = 
 			step_len = len * step;
 
 		}
+		default: ;
 
 	}
 	MIDI_DisableSort(take);
@@ -49,7 +50,7 @@ void fill_each_n_steps(MediaItem_Take* take, float step, double len, bool sel = 
 }
 
 
-void fill_each_n_steps_in_take(MediaItem_Take* take, float step, double len, bool sel = false, bool mute = false, int chan = 0, int pitch = 60, int vel = 127) {
+static void fill_each_n_steps_in_take(MediaItem_Take* take, float step, double len, bool sel = false, bool mute = false, int chan = 0, int pitch = 60, int vel = 127) {
 	MediaItem* item = GetMediaItemTake_Item(take);
 	double take_start = GetMediaItemInfo_Value(item, "D_POSITION");
 	double take_end = MIDI_GetPPQPosFromProjTime(take, take_start + GetMediaItemInfo_Value(item, "D_LENGTH"));
@@ -79,6 +80,7 @@ void fill_each_n_steps_in_take(MediaItem_Take* take, float step, double len, boo
 			step_len = len * step;
 
 		}
+		default: ;
 
 	}
 	MIDI_DisableSort(take);
@@ -151,7 +153,7 @@ struct MidiNote {
 
 constexpr double epsilon = 1e-8; // for small diff between notes
 
-bool generate_data(MediaItem_Take* take, unordered_map<int, vector<vector<MidiNote>>>* data) {
+static bool generate_data(MediaItem_Take* take, unordered_map<int, vector<vector<MidiNote>>>* data) {
 	int n = MIDI_EnumSelNotes(take, -1);
 	if (n < 0) return false;
 	bool sel;
@@ -221,7 +223,7 @@ void note_stutter_decr(COMMAND_T* cmd) {
 	for (const auto &p_line: data) {
 		for (const auto &line: p_line.second) {
 			if (line.size() > 1) {
-				s_data.push_back(move(line));
+				s_data.push_back(std::move(line));
 			}
 		}
 	}

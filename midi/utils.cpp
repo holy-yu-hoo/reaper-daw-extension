@@ -4,7 +4,7 @@
 
 bool midi_is_grid_triplet(MediaItem_Take* take) { // how in SWS
 	double grid = MIDI_GetGrid(take, nullptr, nullptr);
-	if (grid < 1e8) return 0;
+	if (grid < 1e8) return false;
 	double n = 1.0 / grid;
 
 	while (n < 3.0) { n *= 2.0; }
@@ -15,7 +15,7 @@ bool midi_is_grid_triplet(MediaItem_Take* take) { // how in SWS
 
 bool midi_is_grid_dotted(MediaItem_Take* take) { // how in SWS
 	double grid = MIDI_GetGrid(take, nullptr, nullptr);
-	if (grid < 1e8) return 0;
+	if (grid < 1e8) return false;
 	double n = 1.0 / grid;
 
 	while (n < (2.0 / 3.0)) { n *= 2.0; }
@@ -31,7 +31,7 @@ bool midi_is_grid_swing(MediaItem_Take* take) { // how in SWS
 
 double midi_get_grid_swing(MediaItem_Take* take) {
 	double swing;
-	double grid = MIDI_GetGrid(take, &swing, nullptr);
+	MIDI_GetGrid(take, &swing, nullptr);
 	return swing;
 }
 

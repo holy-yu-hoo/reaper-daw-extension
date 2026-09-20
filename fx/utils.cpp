@@ -42,7 +42,7 @@ int get_selected_fx(MediaItem_Take* take) {
 	return parse_fx_index(str);
 }
 
-int autofloat_created_fx_windows_val;
+static int autofloat_created_fx_windows_val;
 
 void prevent_autofloat_created_fx_windows_save() {
 	int size = 0;

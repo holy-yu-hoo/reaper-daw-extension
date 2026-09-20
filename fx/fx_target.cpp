@@ -17,7 +17,7 @@ FX::FX(int tr_idx, int it_idx, int tk_idx, int fx_idx) {
 
 }
 
-FX::FX(std::shared_ptr<IFXContext> ctx, int fx_idx) : IFXTarget(ctx), m_fx_idx(fx_idx) {
+FX::FX(const std::shared_ptr<IFXContext> &ctx, int fx_idx) : IFXTarget(ctx), m_fx_idx(fx_idx) {
 	if (m_ctx and m_fx_idx >= 0) {
 		m_guid = m_ctx->get_fx_guid(m_fx_idx);
 	}
@@ -123,8 +123,7 @@ FX::Preset FX::Preset::get(const FX* fx) {
 bool FX::Preset::set(const FX* fx, const FX::Preset& preset) {
 	if (!fx || !fx->is_valid()) return false;
 	if (preset.m_fx_name != fx->get_config_param("fx_name")) return false;
-	fx->set_chunk(preset.m_preset);
-	return true;
+	return fx->set_chunk(preset.m_preset);
 }
 
 
@@ -139,7 +138,7 @@ FXChain::FXChain(int tr_idx, int it_idx, int tk_idx, int fx_idx) {
 	m_ctx = IFXContext::get_context(tr_idx, it_idx, tk_idx, IS_REC_FX(fx_idx));
 }
 
-FXChain::FXChain(std::shared_ptr<IFXContext> ctx) : IFXTarget(ctx) {}
+FXChain::FXChain(const std::shared_ptr<IFXContext> &ctx) : IFXTarget(ctx) {}
 
 inline bool FXChain::is_visible() const {
 	return m_ctx->get_fx_chain_open();
@@ -272,9 +271,9 @@ int FXChain::add_fx_by_name(std::string name) const {
 	return m_ctx->add_fx_by_name(name);
 }
 
-int FXChain::get_fx_by_guid(string guid)const {
+int FXChain::get_fx_by_guid(string p_guid)const {
 	for (int f = 0; f < m_ctx->get_count(); f++) {
-		if (guid == m_ctx->get_fx_guid(f)) {
+		if (p_guid == m_ctx->get_fx_guid(f)) {
 			return f;
 		}
 	}

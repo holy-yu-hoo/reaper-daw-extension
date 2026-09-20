@@ -45,12 +45,12 @@ void select_tracks_cycle(COMMAND_T* cmd) {
 	for (int i = 0; i < CountSelectedTracks2(nullptr, false); i++) {
 		track = GetSelectedTrack2(nullptr, i, false);
 		int n = GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER") - 1;
-		n = get_cycled_index(n, cmd->user, CountTracks(nullptr));
+		n = get_cycled_index(n, cmd->user, track_cnt);
 		tracks.push_back(GetTrack(nullptr, n));
 	}
 	if (last_track != GetMasterTrack(nullptr)) {
 		int n = GetMediaTrackInfo_Value(last_track, "IP_TRACKNUMBER") - 1;
-		n = get_cycled_index(n, cmd->user, CountTracks(nullptr));
+		n = get_cycled_index(n, cmd->user, track_cnt);
 		track = GetTrack(nullptr, n);
 		SetOnlyTrackSelected(track);
 	} else {

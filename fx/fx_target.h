@@ -6,7 +6,7 @@ class IFXTarget {
 protected:
 	std::shared_ptr<IFXContext> m_ctx;
 public:
-	IFXTarget(std::shared_ptr<IFXContext> ctx = nullptr) :m_ctx(ctx) {};
+	IFXTarget(const std::shared_ptr<IFXContext> &ctx = nullptr) :m_ctx(ctx) {};
 
 	virtual bool is_visible() const = 0;
 
@@ -60,7 +60,7 @@ public:
 
 	FX(int tr_idx, int it_idx, int tk_idx, int fx_idx);
 
-	FX(std::shared_ptr<IFXContext> ctx, int fx_idx);
+	FX(const std::shared_ptr<IFXContext> &ctx, int fx_idx);
 
 	virtual bool is_visible() const override;
 
@@ -133,7 +133,7 @@ public:
 
 	FXChain(int tr_idx, int it_idx, int tk_idx, int fx_idx);
 
-	FXChain(std::shared_ptr<IFXContext> ctx);
+	FXChain(const std::shared_ptr<IFXContext> &ctx);
 
 	virtual bool is_visible() const override;
 

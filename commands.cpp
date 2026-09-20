@@ -8,6 +8,7 @@
 #include "fx/fx_observer.h"
 #include "track/track.h"
 #include "mixer/mixer.h"
+#include "color/color.h"
 
 // @formatter:off
 static std::vector<COMMAND_T> commands = {
@@ -67,8 +68,11 @@ static std::vector<COMMAND_T> commands = {
 	{ ID_PREFIX "SET_TIME_SELECTION_TO_ACTIVE_MIDI_TAKE",  NAME_PREFIX "Set time selection to active midi take",  nullptr,  set_loop_time_range_to_active_take,  SECTION_MIDI_EDITOR,  nullptr,  0,  0 },
 	{ ID_PREFIX "MOVE_LAST_FOCUSED_FX_UP",NAME_PREFIX "Move last focused fx up",nullptr,move_last_focused_fx_,SECTION_MAIN,nullptr,0,-1 },
 	{ ID_PREFIX "MOVE_LAST_FOCUSED_FX_DOWN",NAME_PREFIX "Move last focused fx down",nullptr,move_last_focused_fx_,SECTION_MAIN,nullptr,0,1 },
-	{ID_PREFIX "SMART_SHOW_MIXER", NAME_PREFIX "Smart show mixer",nullptr,show_mixer,SECTION_MAIN,nullptr,0,0},
-{ID_PREFIX "SMART_SHOW_MIXER_WITH_SEL", NAME_PREFIX "Smart show mixer (select track)",nullptr,show_mixer,SECTION_MAIN,nullptr,0,1}
+	{ ID_PREFIX "SMART_SHOW_MIXER", NAME_PREFIX "Smart show mixer",nullptr,smart_show_mixer,SECTION_MAIN,nullptr,0,0},
+	{ ID_PREFIX "SMART_SHOW_MIXER_WITH_SEL", NAME_PREFIX "Smart show mixer (select track)",nullptr,smart_show_mixer,SECTION_MAIN,nullptr,0,1},
+	{ ID_PREFIX "SMART_SHOW_MIXER_NO_HIDE", NAME_PREFIX "Smart show mixer without hide",nullptr,smart_show_mixer_without_hide,SECTION_MAIN,nullptr,0,0},
+	{ ID_PREFIX "SMART_SHOW_MIXER_NO_HIDE_WITH_SEL", NAME_PREFIX "Smart show mixer without hide (select track)",nullptr,smart_show_mixer_without_hide,SECTION_MAIN,nullptr,0,1},
+	{ ID_PREFIX "COLOR_SEL_TRACKS_TO_RAND_GRAD", NAME_PREFIX "Color selected tracks to random gradient",nullptr,set_selected_tracks_to_gradient,SECTION_MAIN,},
 };
 //@formatter:on
 

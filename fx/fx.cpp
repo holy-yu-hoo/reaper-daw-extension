@@ -7,8 +7,6 @@
 using std::operator ""s;
 using std::string;
 
-static std::unordered_map<string, string> presets;
-
 void toggle_show_last_focused_(COMMAND_T* cmd) {
 	const IFXTarget* fx = FXObserver::get_last_focused(cmd->user);
 	if (!*fx) return;

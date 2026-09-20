@@ -1,3 +1,4 @@
+#pragma once
 void save_hor_zoom_mode(COMMAND_T* cmd);
 
 void restore_hor_zoom_mode(COMMAND_T* cmd);

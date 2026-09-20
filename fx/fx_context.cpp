@@ -422,7 +422,6 @@ int TrackFXContext::add_fx_by_name(std::string name) {
 void TrackFXContext::copy_fx(int fx_idx, IFXContext* dest, int dest_fx_idx) {
 	if (TrackFXContext* ctx = dynamic_cast<TrackFXContext*>(dest)) {
 		TrackFX_CopyToTrack(m_track, fx_idx, ctx->m_track, dest_fx_idx, false);
-
 	} else if (TakeFXContext* ctx = dynamic_cast<TakeFXContext*>(dest)) {
 		TrackFX_CopyToTake(m_track, fx_idx, ctx->m_take, dest_fx_idx, false);
 	}
