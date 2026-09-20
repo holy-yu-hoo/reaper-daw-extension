@@ -29,11 +29,13 @@ REAPER_EXTRA_API_DECL MediaItem* (*BR_GetMediaItemByGUID)(ReaProject* proj, cons
 
 REAPER_EXTRA_API_DECL void (*BR_GetMediaItemTakeGUID)(MediaItem_Take* take, char* guidStringOut, int guidStringOut_sz);
 
-REAPER_EXTRA_API_DECL HWND(*CF_GetTrackFXChainEx)(ReaProject* project, MediaTrack* track, bool wantInputChain);
+REAPER_EXTRA_API_DECL HWND (*CF_GetTrackFXChainEx)(ReaProject* project, MediaTrack* track, bool wantInputChain);
 
-REAPER_EXTRA_API_DECL HWND(*CF_GetTakeFXChain)(MediaItem_Take* take);
+REAPER_EXTRA_API_DECL HWND (*CF_GetTakeFXChain)(MediaItem_Take* take);
 
-REAPER_EXTRA_API_DECL HWND(*CF_GetFocusedFXChain)();
+REAPER_EXTRA_API_DECL HWND (*CF_GetFocusedFXChain)();
+
+REAPER_EXTRA_API_DECL void* (*BR_Win32_GetMixerHwnd)(bool* isDockedOut);
 
 
 constexpr int SECTION_MAIN = 0;
@@ -57,11 +59,12 @@ typedef struct COMMAND_T {
 
 	int cmd_id;
 	INT_PTR user;
-	int(*get_enabled)(COMMAND_T*);
+
+	int (*get_enabled)(COMMAND_T*);
 } COMMAND_T;
 
 
-bool register_commands(std::vector<COMMAND_T>&); // implement in main.cpp
-bool unregister_commands(std::vector<COMMAND_T>& commands); // implement in main.cpp
+bool register_commands(std::vector<COMMAND_T> &); // implement in main.cpp
+bool unregister_commands(std::vector<COMMAND_T> &commands); // implement in main.cpp
 
 #endif

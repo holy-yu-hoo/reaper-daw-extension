@@ -1,5 +1,6 @@
 #include "api.h"
 #include "track_observer.h"
+#include  "mixer/mixer.h"
 #include "utils.h"
 
 
@@ -11,6 +12,7 @@ int TrackObserver::Extended(int call, void* parm1, void* parm2, void* parm3) {
 	switch (call) {
 		case (CSURF_EXT_SETLASTTOUCHEDTRACK): {
 			MediaTrack* track = static_cast<MediaTrack*>(parm1);
+			update_mixer_track(track);
 			return m_auto_solo_mode->OnTrackEvent(TrackEvent{TrackEvent::LastTouched, track});
 			break;
 		}

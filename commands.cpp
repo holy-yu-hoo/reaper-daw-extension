@@ -7,9 +7,10 @@
 #include "fx/fx.h"
 #include "fx/fx_observer.h"
 #include "track/track.h"
+#include "mixer/mixer.h"
 
 // @formatter:off
-std::vector<COMMAND_T> commands = {
+static std::vector<COMMAND_T> commands = {
 	{ ID_PREFIX "INSERT_4_BARS_MIDI_ITEM_AT_CURSOR",NAME_PREFIX "Insert 4 bars midi item at cursor", nullptr, insert_4_bars_midi_item_at_cursor, SECTION_MAIN, nullptr },
 	{ ID_PREFIX "FX_A/B_COMPARER", NAME_PREFIX "FX A/B comparer", nullptr, ab_comparer, SECTION_MAIN, nullptr, 0, 0 },
 	{ ID_PREFIX "FX_CHAIN_A/B_COMPARER", NAME_PREFIX "FX chain A/B comparer", nullptr, ab_comparer, SECTION_MAIN, nullptr, 0, 1 },
@@ -66,6 +67,8 @@ std::vector<COMMAND_T> commands = {
 	{ ID_PREFIX "SET_TIME_SELECTION_TO_ACTIVE_MIDI_TAKE",  NAME_PREFIX "Set time selection to active midi take",  nullptr,  set_loop_time_range_to_active_take,  SECTION_MIDI_EDITOR,  nullptr,  0,  0 },
 	{ ID_PREFIX "MOVE_LAST_FOCUSED_FX_UP",NAME_PREFIX "Move last focused fx up",nullptr,move_last_focused_fx_,SECTION_MAIN,nullptr,0,-1 },
 	{ ID_PREFIX "MOVE_LAST_FOCUSED_FX_DOWN",NAME_PREFIX "Move last focused fx down",nullptr,move_last_focused_fx_,SECTION_MAIN,nullptr,0,1 },
+	{ID_PREFIX "SMART_SHOW_MIXER", NAME_PREFIX "Smart show mixer",nullptr,show_mixer,SECTION_MAIN,nullptr,0,0},
+{ID_PREFIX "SMART_SHOW_MIXER_WITH_SEL", NAME_PREFIX "Smart show mixer (select track)",nullptr,show_mixer,SECTION_MAIN,nullptr,0,1}
 };
 //@formatter:on
 

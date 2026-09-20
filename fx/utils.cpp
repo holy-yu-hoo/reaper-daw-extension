@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "misc/utils.h"
 
-static int parse_fx_index(const std::string& value) {
+static int parse_fx_index(const std::string &value) {
 	if (value.empty()) return -1;
 	char* end = nullptr;
 	const long parsed = std::strtol(value.c_str(), &end, 10);
@@ -43,6 +43,7 @@ int get_selected_fx(MediaItem_Take* take) {
 }
 
 int autofloat_created_fx_windows_val;
+
 void prevent_autofloat_created_fx_windows_save() {
 	int size = 0;
 	int* addr = static_cast<int*>(get_config_var("fxfloat_focus", &size));

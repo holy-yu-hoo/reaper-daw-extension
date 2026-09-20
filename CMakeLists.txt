@@ -29,6 +29,7 @@ set(SOURCES
 	track/track.cpp
 	track/track_observer.cpp
 	track/utils.cpp
+	mixer/mixer.cpp
 )
 
 set(HEADERS
@@ -49,6 +50,7 @@ set(HEADERS
 	track/track.h
 	track/track_observer.h
 	track/utils.h
+	mixer/mixer.h
 )
 
 

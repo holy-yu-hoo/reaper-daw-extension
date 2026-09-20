@@ -13,6 +13,8 @@ void select_track_cycle(COMMAND_T* cmd) {
 	MediaTrack* track = GetTrack(nullptr, n);
 	SetOnlyTrackSelected(track);
 	Main_OnCommandEx(40913, 0, nullptr);
+	SetMixerScroll(track);
+	TrackList_AdjustWindows(false);
 	PreventUIRefresh(-1);
 }
 
@@ -29,6 +31,8 @@ void select_track_cycle_keep_selection(COMMAND_T* cmd) {
 	SetOnlyTrackSelected(track);
 	for (MediaTrack* tr: tracks) SetTrackSelected(tr, true);
 	Main_OnCommandEx(40913, 0, nullptr);
+	SetMixerScroll(track);
+	TrackList_AdjustWindows(false);
 	PreventUIRefresh(-1);
 }
 
@@ -54,5 +58,7 @@ void select_tracks_cycle(COMMAND_T* cmd) {
 	}
 	for (MediaTrack* tr: tracks) SetTrackSelected(tr, true);
 	Main_OnCommandEx(40913, 0, nullptr);
+	SetMixerScroll(last_track);
+	TrackList_AdjustWindows(false);
 	PreventUIRefresh(-1);
 }

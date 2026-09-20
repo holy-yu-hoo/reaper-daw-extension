@@ -6,9 +6,9 @@ static reaper_plugin_info_t* g_rec = nullptr;
 
 static std::vector<COMMAND_T> g_commands = {};
 
-bool register_commands(std::vector<COMMAND_T>& commands) {
-	static custom_action_register_t car{ 0 };
-	for (auto& command : commands) {
+bool register_commands(std::vector<COMMAND_T> &commands) {
+	static custom_action_register_t car{0};
+	for (auto &command: commands) {
 		car.idStr = command.id;
 		car.name = command.name;
 		car.uniqueSectionId = command.unique_section_id;
@@ -19,9 +19,9 @@ bool register_commands(std::vector<COMMAND_T>& commands) {
 	return true;
 }
 
-bool unregister_commands(std::vector<COMMAND_T>& commands) {
-	static custom_action_register_t car{ 0 };
-	for (auto& command : commands) {
+bool unregister_commands(std::vector<COMMAND_T> &commands) {
+	static custom_action_register_t car{0};
+	for (auto &command: commands) {
 		const int registered_cmd_id = command.cmd_id;
 		car.idStr = command.id;
 		car.name = command.name;
@@ -29,9 +29,13 @@ bool unregister_commands(std::vector<COMMAND_T>& commands) {
 		const int ok = plugin_register("-custom_action", static_cast<void*>(&car));
 		if (!ok) return false;
 		g_commands.erase(
-			std::remove_if(g_commands.begin(), g_commands.end(), [cmd_id = registered_cmd_id](const COMMAND_T& registered) {
-				return registered.cmd_id == cmd_id;
-				}),
+			std::remove_if(
+				g_commands.begin(),
+				g_commands.end(),
+				[cmd_id = registered_cmd_id](const COMMAND_T &registered) {
+					return registered.cmd_id == cmd_id;
+				}
+			),
 			g_commands.end()
 		);
 		command.cmd_id = 0;
@@ -40,13 +44,13 @@ bool unregister_commands(std::vector<COMMAND_T>& commands) {
 }
 
 static COMMAND_T* find_by_id(int iCmd) {
-	auto it = std::find_if(g_commands.begin(), g_commands.end(), [iCmd](const COMMAND_T& cmd) {return cmd.cmd_id == iCmd;});
+	auto it = std::find_if(g_commands.begin(), g_commands.end(), [iCmd](const COMMAND_T &cmd) { return cmd.cmd_id == iCmd; });
 	return (it == g_commands.end() ? nullptr : &*it);
 
 }
 
 static bool hook_command_proc_2(KbdSectionInfo* sec, int cmd, int val, int val2, int relmode, HWND hwnd) {
-	auto act = std::find_if(g_commands.begin(), g_commands.end(), [cmd](const COMMAND_T& command) { return command.cmd_id == cmd; });
+	auto act = std::find_if(g_commands.begin(), g_commands.end(), [cmd](const COMMAND_T &command) { return command.cmd_id == cmd; });
 	if (act != std::end(g_commands)) {
 		if (act->do_command) {
 			act->do_command(&*act);
@@ -58,6 +62,7 @@ static bool hook_command_proc_2(KbdSectionInfo* sec, int cmd, int val, int val2,
 
 	return false;
 }
+
 static int hook_command_toggle(int iCmd) {
 	COMMAND_T* cmd = find_by_id(iCmd);
 	if (cmd) {
@@ -85,9 +90,9 @@ static void Init() {
 }
 
 static void Exit() {
-#ifdef _DEBUG
+	#ifdef _DEBUG
 	ShowConsoleMsg("EXIT");
-#endif
+	#endif
 	g_rec->Register("-timer", static_cast<void*>(import_extension_api));
 	g_rec->Register("-hookcommand2", static_cast<void*>(&hook_command_proc_2));
 	g_rec->Register("-toggleaction", static_cast<void*>(&hook_command_toggle));
@@ -109,6 +114,7 @@ static void import_extension_api() {
 	SWS_API(CF_GetTrackFXChainEx);
 	SWS_API(CF_GetTakeFXChain);
 	SWS_API(CF_GetFocusedFXChain);
+	SWS_API(BR_Win32_GetMixerHwnd);
 
 }
 
@@ -132,9 +138,9 @@ extern "C" REAPER_PLUGIN_DLL_EXPORT int ReaperPluginEntry(
 
 	Init();
 
-#if defined(_DEBUG)
+	#if defined(_DEBUG)
 	ShowConsoleMsg("Extension loaded successfully.\n");
-#endif
+	#endif
 
 	return 1;
 }
